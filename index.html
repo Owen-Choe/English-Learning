@@ -18,21 +18,40 @@
     font-family: -apple-system, "Apple SD Gothic Neo", "Segoe UI", sans-serif;
   }
   .display { font-family: "Space Grotesk", -apple-system, "Apple SD Gothic Neo", sans-serif; }
+  .skip-link {
+    position: absolute; left: -999px; top: 0; background: var(--violet); color: #fff;
+    padding: 10px 16px; border-radius: 0 0 8px 0; z-index: 100; text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
   .wrap { max-width: 860px; margin: 0 auto; }
   .sticky-col {
     position: sticky; top: 0; z-index: 10;
     background: #0f0f14; padding: 10px 0; margin: 0 0 -10px;
   }
+  @media (max-width: 700px) {
+    .sticky-col { position: static; }
+  }
   h1 { font-size: 28px; margin: 0 0 4px; }
   .sub { color: #9a9aa5; margin: 0 0 28px; font-size: 15px; }
+  .source-line { color: #9a9aa5; font-size: 13px; margin: 10px 0 0; line-height: 1.6; }
+  .source-line a { color: #9479fc; }
+  .date-nav { display: flex; gap: 8px; margin: 18px 0 28px; }
+  .date-nav-btn {
+    flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center;
+    text-align: center; font-size: 13px; color: #d7d7de; background: #1a1a22;
+    border: 1px solid #2b2b36; border-radius: 10px; text-decoration: none; padding: 0 10px;
+    transition: border-color .15s, color .15s;
+  }
+  .date-nav-btn:hover { border-color: var(--violet); color: #fff; }
+  .date-nav-btn.disabled { color: #4a4a55; pointer-events: none; }
   .player-box {
     position: relative; width: 100%; aspect-ratio: 16/9;
     border-radius: 16px; overflow: hidden; background: #000;
     box-shadow: 0 8px 30px rgba(0,0,0,.4);
   }
   #player { width: 100%; height: 100%; }
-  .hint { text-align: center; color: #6f6f7a; font-size: 13px; margin: 10px 0 32px; }
-  .badge { font-size: 12px; color: var(--violet); font-weight: 700;
+  .hint { text-align: center; color: #8f8f9a; font-size: 13px; margin: 10px 0 32px; }
+  .badge { font-size: 12px; color: #9479fc; font-weight: 700;
            letter-spacing: .04em; margin-bottom: 10px; }
   .section-title { display: flex; align-items: center; gap: 8px; font-weight: 700;
                     font-size: 18px; margin: 40px 0 14px; }
@@ -51,9 +70,11 @@
   }
   .script-line {
     padding: 14px 12px; margin: 0 -12px; border-bottom: 1px solid #24242e;
-    border-radius: 8px; border-left: 3px solid transparent;
+    border-radius: 8px; border-left: 3px solid transparent; cursor: pointer;
+    min-height: 44px;
   }
   .script-line:last-child { border-bottom: none; }
+  .script-line:hover { background: #ffffff08; }
   .script-line.active { background: #7c5cfc1a; border-left-color: var(--violet); }
   .speaker { font-size: 12px; font-weight: 700; color: var(--violet); letter-spacing: .04em; }
   .script-en { font-size: 16px; color: #fff; margin: 4px 0 2px; }
@@ -70,6 +91,7 @@
   .card {
     display: block; background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px;
     padding: 0; margin-bottom: 14px; transition: border-color .15s;
+    scroll-margin-top: 76px;
   }
   .card:hover { border-color: var(--violet); }
   .card-top {
@@ -81,6 +103,7 @@
   .chevron { color: #6f6f7a; transition: transform .2s; flex-shrink: 0; }
   details[open] > .card-top .chevron { transform: rotate(180deg); }
   .expr { font-size: 22px; font-weight: 700; color: #fff; }
+  .expr:focus { outline: 2px solid var(--violet); outline-offset: 4px; }
   .tag { font-size: 14px; color: #9a9aa5; margin-top: 4px; }
   .ts {
     font-size: 12px; font-weight: 700; color: var(--violet); background: #7c5cfc1a;
@@ -104,13 +127,13 @@
   .subbox-tip .subbox-label { color: var(--teal); }
   .subbox-example .subbox-label { color: var(--green); }
   .quote { font-style: italic; color: #fff; font-size: 15px; }
-  .quote-speaker { color: #6f6f7a; font-size: 12px; margin-top: 4px; }
+  .quote-speaker { color: #8f8f9a; font-size: 12px; margin-top: 4px; }
   .context, .tip { color: #c3c3cc; font-size: 14px; line-height: 1.6; }
   .example { margin-top: 8px; }
   .example .en { color: #fff; font-size: 14px; }
   .example .ko { color: #8f8f9a; font-size: 13px; }
 
-  a:focus-visible, button:focus-visible, summary:focus-visible {
+  a:focus-visible, button:focus-visible, summary:focus-visible, [role="button"]:focus-visible {
     outline: 2px solid var(--violet); outline-offset: 2px;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -119,29 +142,37 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">본문 바로가기</a>
 <div class="wrap">
-  <div class="badge display">TODAY'S LEARNING · DAILY</div>
-  <h1 class="display">오늘의 Gen Z 표현</h1>
-  <p class="sub">14:42 ~ 15:57 구간에서 뽑은 표현 7개</p>
-  <div class="jump-row"><a class="jump-chip display" href="days/2026-07-31.html">07-31</a><a class="jump-chip display" href="days/2026-07-30.html">07-30</a><a class="jump-chip display" href="days/2026-07-29.html">07-29</a></div>
+  <header>
+    <div class="badge display">TODAY'S LEARNING · DAILY</div>
+    <h1 class="display">오늘의 Gen Z 표현</h1>
+    <p class="sub">22:10 ~ 23:25 구간에서 뽑은 표현 6개</p>
+    <nav class="date-nav" aria-label="날짜 이동"><a class="date-nav-btn" href="days/2026-07-30.html">← 이전 학습</a><a class="date-nav-btn" href="index.html">전체 학습</a><span class="date-nav-btn disabled" aria-disabled="true">다음 학습 →</span></nav>
+  </header>
 
-  <div class="sticky-col">
-    <div class="player-box"><div id="player"></div></div>
-  </div>
-  <p class="hint">타임스탬프를 클릭하면 그 표현이 나오는 순간으로 이동합니다. 자동재생이 차단되면 영상을 한 번 클릭해주세요.</p>
+  <main id="main">
+    <div class="sticky-col">
+      <div class="player-box"><div id="player"></div></div>
+    </div>
+    <p class="source-line" id="source-line"></p>
+    <p class="hint">타임스탬프를 클릭하면 그 표현이 나오는 순간으로 이동합니다. 자동재생이 차단되면 영상을 한 번 클릭해주세요.</p>
 
-  <div class="section-title"><span class="dot dot-violet"></span>오늘의 장면</div>
-  <div class="scene-box" id="scene"></div>
+    <h2 class="section-title"><span class="dot dot-violet" aria-hidden="true"></span>오늘의 장면</h2>
+    <div class="scene-box" id="scene"></div>
 
-  <div class="section-title"><span class="dot dot-teal"></span>스크립트</div>
-  <div class="script-box" id="script"></div>
+    <h2 class="section-title"><span class="dot dot-teal" aria-hidden="true"></span>스크립트</h2>
+    <div class="script-box" id="script"></div>
 
-  <div class="section-title"><span class="dot dot-green"></span>오늘의 표현</div>
-  <div class="jump-row" id="jump-row"></div>
-  <div id="cards"></div>
+    <h2 class="section-title"><span class="dot dot-green" aria-hidden="true"></span>오늘의 표현</h2>
+    <nav class="jump-row" id="jump-row" aria-label="표현 바로가기"></nav>
+    <div id="cards"></div>
+  </main>
+
+  <h2 class="section-title"><span class="dot dot-amber" aria-hidden="true"></span>지난 학습</h2><nav class="jump-row" aria-label="지난 학습 목록"><a class="jump-chip display" href="days/2026-07-31.html">07-31</a><a class="jump-chip display" href="days/2026-07-30.html">07-30</a><a class="jump-chip display" href="days/2026-07-29.html">07-29</a></nav>
 </div>
 
-<script id="expr-data" type="application/json">{"scene_summary": "Emma는 뉴욕에서 친구와 함께 거리를 걸으며 일상적인 잡담을 나눈다. 곰팡이 핀 블루베리를 먹은 것, 사진이 자기다운지 아닌지, 정수리 탈모 부위, 땀 자국 등 소소하고 웃긴 이야기를 주고받는다. 이어서 친구가 길을 건너는 걸 무서워하는 Emma를 놀리며 장난스럽게 대화가 이어진다.", "start_sec": 882, "end_sec": 957, "script": [{"speaker": "Emma", "en": "I think I just ate a moldy blueberry.", "ko": "나 방금 곰팡이 핀 블루베리 먹은 것 같아.", "timestamp": 882}, {"speaker": "Emma", "en": "This is also so me. So you it's actually never been less me.", "ko": "이것도 완전 나다워. 아니 사실 이거보다 나답지 않은 적이 없었어.", "timestamp": 904}, {"speaker": "화자", "en": "That's cute.", "ko": "그거 귀엽다.", "timestamp": 912}, {"speaker": "Emma", "en": "Here's the thing. I do have a bald spot on the top of my head. So this is really triggering for me. I'll blur it out. I have to go like this. I'll blur it like this.", "ko": "있잖아, 나 정수리에 탈모 부위가 있어. 그래서 이게 진짜 나한테 트리거야. 흐리게 처리할게. 이렇게 해야 돼. 이렇게 흐리게 할게.", "timestamp": 913}, {"speaker": "Emma", "en": "I have pit stains. I'm not going to show you, but I do.", "ko": "나 겨드랑이에 땀자국 있어. 안 보여줄 거지만 진짜 있어.", "timestamp": 936}, {"speaker": "화자", "en": "Very hot. Very hot out.", "ko": "완전 더워. 밖에 완전 더워.", "timestamp": 938}, {"speaker": "Emma", "en": "It's sweaty.", "ko": "완전 땀나.", "timestamp": 940}, {"speaker": "화자", "en": "Do we turn right or no?", "ko": "우리 오른쪽으로 가는 거야 아니야?", "timestamp": 941}, {"speaker": "Emma", "en": "No, we keep going straight.", "ko": "아니, 계속 직진이야.", "timestamp": 942}, {"speaker": "화자", "en": "it's okay, Emma. You can cross. There's no one come. Emma has a fear of crossing the street.", "ko": "괜찮아, Emma. 건너도 돼. 아무도 안 와. Emma는 길 건너는 걸 무서워해.", "timestamp": 944}, {"speaker": "Emma", "en": "I don't know how to cross.", "ko": "나 어떻게 건너야 할지 모르겠어.", "timestamp": 948}, {"speaker": "화자", "en": "It says walk right. She looks both ways as you're supposed to and then stops in the middle of the street to make sure no one's I go. Well, now you're going to get hit.", "ko": "건너가라고 나오는데. 얘는 원래 하라는 대로 양쪽을 살피고는 길 한복판에서 멈춰서 아무도 없는지 다시 확인해. 이제 진짜 차에 치이겠다.", "timestamp": 950}, {"speaker": "화자", "en": "Are you going to put it back in after?", "ko": "그거 나중에 다시 넣을 거야?", "timestamp": 957}], "expressions": [{"expr": "This is so me", "tag": "완전 내 얘기야/내 스타일이야 (캐주얼한 Gen Z 표현)", "quote_en": "This is also so me. So you it's actually never been less me.", "quote_speaker": "Emma", "context": "'so me'는 어떤 사진, 행동, 상황이 자신의 성격이나 습관을 정확히 반영할 때 쓰는 표현이다. 원래 긍정적으로 '완전 내 스타일이야'라는 뜻이지만, 여기서는 반대로 'never been less me(이보다 나답지 않은 적이 없다)'라고 자조적으로 비틀어 쓰며 웃음을 유발한다. Gen Z 사이에서 사진이나 짤을 보고 리액션할 때 자주 쓰이는 표현이다. 한국어로는 '이거 완전 나임' 정도로 번역할 수 있다.", "listening_tip": "'so me'는 강세가 'so'에 강하게 들어가며 빠르게 발음되어 '쏘미'처럼 들린다.", "examples": [{"en": "That awkward selfie is so me.", "ko": "그 어색한 셀카는 완전 내 얘기야."}, {"en": "Forgetting my keys again? So me.", "ko": "또 열쇠를 깜빡했다고? 완전 나다워."}], "timestamp": 904}, {"expr": "That's cute", "tag": "그거 귀엽네/괜찮네 (가벼운 반응 표현)", "quote_en": "That's cute.", "quote_speaker": "화자", "context": "'That's cute'는 상대방이 한 말이나 행동에 대해 가볍게 호응할 때 쓰는 짧은 반응 표현이다. 진심으로 귀엽다는 뜻일 수도 있지만, 뉘앙스에 따라 심드렁하게 '그렇구나' 정도의 의미로도 쓰인다. 특히 대화 중 별다른 리액션이 필요할 때 짧게 던지는 필러성 표현으로 Gen Z 대화에서 매우 흔하다. 상황과 톤에 따라 진지함과 장난스러움 사이를 오간다.", "listening_tip": "짧고 빠르게 'That's cute'로 붙여 발음하며, 't' 발음이 약해져서 '댓츠 큣'처럼 자연스럽게 흘러간다.", "examples": [{"en": "You made a playlist for our trip? That's cute.", "ko": "우리 여행용 플레이리스트를 만들었다고? 그거 귀엽다."}, {"en": "He texted 'good morning' every day. That's cute.", "ko": "걔가 매일 '굿모닝'이라고 문자했대. 그거 귀엽네."}], "timestamp": 912}, {"expr": "triggering", "tag": "불편하게 만드는, 예민해지는 (과장되게 쓰이는 캐주얼 표현)", "quote_en": "So this is really triggering for me.", "quote_speaker": "Emma", "context": "원래 'triggering'은 트라우마를 자극한다는 심리학 용어지만, Gen Z 사이에서는 일상적으로 조금 불편하거나 신경 쓰이는 것을 과장되게 표현할 때 유머러스하게 쓰인다. 여기서는 정수리 탈모 부위를 언급하며 '이거 진짜 트리거된다'는 식으로 가볍게 자기 비하 개그를 한다. 진지한 상황이 아니라 셀프 디프리케이팅 유머 톤으로 쓰인 것이 포인트다. 실제로 심각한 트라우마를 의미하지 않는 경우가 대부분이다.", "listening_tip": "'triggering'은 3음절로 '트리거링'처럼 발음되며, 강세는 첫 음절 'trig'에 있다.", "examples": [{"en": "Seeing my old photos is so triggering.", "ko": "옛날 사진 보는 거 진짜 불편해."}, {"en": "That meme about Mondays is triggering.", "ko": "월요일에 관한 그 밈 진짜 공감돼서 불편하다."}], "timestamp": 913}, {"expr": "Here's the thing", "tag": "그게 말이지, 중요한 건 (화제를 전환할 때 쓰는 캐주얼 표현)", "quote_en": "Here's the thing. I do have a bald spot on the top of my head.", "quote_speaker": "Emma", "context": "'Here's the thing'은 뭔가 중요한 점이나 설명을 시작할 때 쓰는 대화 전환 표현이다. 격식 있는 자리에서도 쓸 수 있지만, 캐주얼한 대화에서는 갑자기 진지하거나 흥미로운 이야기를 꺼낼 때 자연스럽게 붙인다. Emma가 갑자기 자신의 탈모 부위 이야기를 꺼내기 전에 이 표현을 써서 청자의 주의를 끄는 역할을 한다. 영어 회화에서 매우 자주 쓰이는 만능 도입구다.", "listening_tip": "'Here's'는 축약되어 '히어즈'처럼 빠르게 발음되고, 'the thing'에 강세가 실려 뒷내용을 강조한다.", "examples": [{"en": "Here's the thing, I don't actually like coffee.", "ko": "있잖아, 사실 나 커피 안 좋아해."}, {"en": "Here's the thing about living alone.", "ko": "혼자 사는 것에 대해 중요한 게 있어."}], "timestamp": 913}, {"expr": "or no?", "tag": "~야 아니야? (캐주얼한 질문 꼬리표, 비격식)", "quote_en": "Do we turn right or no?", "quote_speaker": "화자", "context": "'or no?'는 원래 문법적으로는 'or not?'이 맞지만, 구어체에서는 'or no?'라고 줄여 말하는 경우가 매우 흔하다. 특히 즉흥적으로 방향이나 결정을 확인할 때 짧고 캐주얼하게 붙이는 표현이다. Gen Z와 밀레니얼 세대의 일상 대화에서 문장 끝에 자주 붙는 태그 질문이다. 격식 있는 글쓰기에서는 쓰지 않는다.", "listening_tip": "'or no'는 붙여서 빠르게 발음되며 끝을 올려 질문 톤을 만든다. '오어노우'처럼 들린다.", "examples": [{"en": "Are we still meeting up or no?", "ko": "우리 아직 만나는 거야 아니야?"}, {"en": "Is she coming or no?", "ko": "걔 오는 거야 아니야?"}], "timestamp": 941}, {"expr": "You're going to get hit", "tag": "너 (차에) 치일 거야 (장난스러운 경고/놀림)", "quote_en": "Well, now you're going to get hit.", "quote_speaker": "화자", "context": "'get hit'는 원래 '(차 등에) 치이다'라는 뜻이지만, 여기서는 친구를 놀리는 유머러스한 경고로 쓰였다. 길을 건너면서 지나치게 조심스러워하는 Emma를 보고 과장되게 '이제 진짜 치이겠다'라고 농담하는 상황이다. 친한 친구 사이에서 상대의 소심한 행동을 장난스럽게 지적할 때 자주 쓰이는 캐주얼 표현이다. 심각한 의미보다는 애정 어린 놀림에 가깝다.", "listening_tip": "'going to'는 'gonna'로 축약되어 빠르게 들리며, 'get hit'는 짧고 강하게 끊어 발음된다.", "examples": [{"en": "If you keep texting while walking, you're going to get hit.", "ko": "걸으면서 계속 문자하다간 진짜 치일 거야."}, {"en": "Watch out, you're going to get hit by that door.", "ko": "조심해, 그 문에 부딪힐 거야."}], "timestamp": 954}, {"expr": "put it back in", "tag": "다시 넣다/끼우다 (캐주얼한 일상 표현)", "quote_en": "Are you going to put it back in after?", "quote_speaker": "화자", "context": "'put it back in'은 물건을 원래 있던 자리에 다시 넣거나 끼운다는 뜻으로, 일상 대화에서 매우 자주 쓰이는 구동사다. 여기서는 문맥상 정확한 대상은 불분명하지만(잘려 있는 대화의 일부), 친구들 사이의 자연스러운 잡담에서 흔히 등장하는 패턴이다. 'put ~ back in'의 구조는 영어 회화에서 물건을 제자리에 돌려놓을 때 기본적으로 쓰는 표현이라 익혀두면 유용하다.", "listening_tip": "'put it back in'은 연음되어 '푸릿백인'처럼 빠르게 흘러가며, 'back'에 약간의 강세가 있다.", "examples": [{"en": "Can you put it back in the fridge when you're done?", "ko": "다 쓰면 다시 냉장고에 넣어줄래?"}, {"en": "I took out my earrings but I'll put them back in later.", "ko": "귀걸이 뺐는데 나중에 다시 낄 거야."}], "timestamp": 957}], "video_id": "oqYIu4rK_CY"}</script>
+<script id="expr-data" type="application/json">{"scene_summary": "화자는 친구 생일 저녁 약속을 위해 급하게 옷을 갈아입고 화장을 마무리하는 장면이다. 스커트 착용이 예상보다 잘 되어 만족감을 느끼고, 평소 입지 않던 옷을 입으며 즐거움과 뿌듯함을 느낀다. 손톱 정리 중 약간 번지는 실수를 하지만 대수롭지 않게 넘기며 하루를 마무리한다.", "start_sec": 1330, "end_sec": 1405, "script": [{"speaker": "화자", "en": "I don't know. This gorgeous gray skirt.", "ko": "잘 모르겠어. 이 멋진 회색 치마 말이야.", "timestamp": 1330}, {"speaker": "화자", "en": "Why not? Honestly, with these... that's cute.", "ko": "왜 안 되겠어? 솔직히 이거랑 같이 입으니까... 예쁘네.", "timestamp": 1333}, {"speaker": "화자", "en": "This is like a big skirt, but it's cute.", "ko": "이건 좀 큰 치마인데, 그래도 예뻐.", "timestamp": 1336}, {"speaker": "화자", "en": "That was actually very easy.", "ko": "이거 진짜 쉬웠어.", "timestamp": 1338}, {"speaker": "화자", "en": "I'm feeling thrilled cuz usually when I need to get dressed quickly, that's when it takes me the longest to get dressed.", "ko": "완전 신나. 보통 빨리 입어야 할 때가 오히려 제일 오래 걸리거든.", "timestamp": 1342}, {"speaker": "화자", "en": "So, that was really successful.", "ko": "그래서 이번엔 진짜 성공적이었어.", "timestamp": 1347}, {"speaker": "화자", "en": "So, I just need to like touch it up and add to it a little bit.", "ko": "이제 살짝 다듬고 조금만 더 손보면 돼.", "timestamp": 1350}, {"speaker": "화자", "en": "Recover up the zits.", "ko": "여드름 좀 커버해야지.", "timestamp": 1353}, {"speaker": "화자", "en": "I actually really enjoyed wearing my cute little outfit while I was doing my nails and working today.", "ko": "오늘 네일하고 일하면서 이 귀여운 옷 입은 게 진짜 좋았어.", "timestamp": 1355}, {"speaker": "화자", "en": "Like, it really brought me joy and it got me to wear something that I don't wear very often.", "ko": "진짜 기분이 좋아졌고, 평소에 잘 안 입는 옷도 입게 됐어.", "timestamp": 1360}, {"speaker": "화자", "en": "I don't wear that gray skirt very much.", "ko": "이 회색 치마 평소엔 잘 안 입거든.", "timestamp": 1366}, {"speaker": "화자", "en": "So, that did prove my theory that this lifestyle would get me to wear more of my clothes.", "ko": "그래서 이 라이프스타일이 옷을 더 많이 입게 해준다는 내 이론이 맞았어.", "timestamp": 1369}, {"speaker": "화자", "en": "I would get more use out of my clothes.", "ko": "옷을 더 활용하게 되는 거지.", "timestamp": 1375}, {"speaker": "화자", "en": "I mean, I'm already wearing things that I normally don't wear.", "ko": "이미 평소에 안 입던 옷들을 입고 있잖아.", "timestamp": 1377}, {"speaker": "화자", "en": "So, that's pretty cool.", "ko": "그거 꽤 괜찮은 것 같아.", "timestamp": 1380}, {"speaker": "화자", "en": "Um, I might regret this, but I'll smudge it out and we'll see.", "ko": "음, 후회할 수도 있는데, 그냥 좀 번지게 해볼게. 어떻게 되나 보자.", "timestamp": 1383}, {"speaker": "화자", "en": "Okay, it's a little messy, but I can clean it up with a Q-tip, maybe.", "ko": "좀 지저분한데, 면봉으로 정리하면 될 것 같아.", "timestamp": 1387}, {"speaker": "화자", "en": "Okay, I look a little tired, but it's okay.", "ko": "좀 피곤해 보이긴 하는데, 뭐 괜찮아.", "timestamp": 1390}, {"speaker": "화자", "en": "Ooh, that's fun. Oh, yeah. That's [ __ ] fun.", "ko": "오, 이거 재밌다. 완전 재밌네.", "timestamp": 1396}, {"speaker": "화자", "en": "Making it a little spiky.", "ko": "살짝 삐죽삐죽하게 만들고 있어.", "timestamp": 1400}, {"speaker": "화자", "en": "And then I'll put my glasses back on.", "ko": "그리고 다시 안경을 쓸 거야.", "timestamp": 1401}, {"speaker": "화자", "en": "vibe.", "ko": "분위기 있네.", "timestamp": 1404}, {"speaker": "화자", "en": "The nails do not match the vibe tonight.", "ko": "오늘 밤 네일이 분위기랑 안 맞네.", "timestamp": 1405}], "expressions": [{"expr": "that's cute", "tag": "귀엽다, 예쁘다 (가벼운 구어체 칭찬)", "quote_en": "Why not? Honestly, with these... that's cute.", "quote_speaker": "화자", "context": "'cute'는 원래 '귀엽다'는 뜻이지만 미국 젊은 층 사이에서는 옷, 헤어스타일, 소품 등 거의 모든 것에 대한 만능 칭찬 표현으로 쓰인다. 예쁘다, 스타일리시하다는 뜻을 모두 포함하며 격식 없는 자리에서 매우 자주 사용된다. 이 영상에서도 옷차림을 평가할 때마다 반복적으로 등장하는 핵심 표현이다. 한국어의 '괜찮다', '예쁘다'와 비슷한 뉘앙스로 이해하면 된다.", "listening_tip": "'that's'는 종종 '댓쓰'처럼 빠르게 축약되어 발음되고, 'cute'는 '큐트'보다 '큣'에 가깝게 짧게 끊어 발음된다.", "examples": [{"en": "Oh my gosh, your new bag is so cute!", "ko": "세상에, 네 새 가방 진짜 예쁘다!"}, {"en": "That coffee shop has a really cute vibe.", "ko": "그 카페 분위기가 진짜 귀엽고 예뻐."}], "timestamp": 1333}, {"expr": "I'm feeling thrilled", "tag": "완전 신나, 짜릿해 (감정을 강조하는 구어체)", "quote_en": "I'm feeling thrilled cuz usually when I need to get dressed quickly, that's when it takes me the longest to get dressed.", "quote_speaker": "화자", "context": "'thrilled'은 'happy'보다 훨씬 강한 흥분과 기쁨을 나타내는 단어로, 예상치 못한 좋은 결과에 대한 반응으로 자주 쓰인다. 여기서는 옷을 빨리 골랐는데도 만족스러운 결과가 나와서 놀람과 기쁨을 동시에 표현하고 있다. 일상 대화에서 감탄사처럼 가볍게 쓰이며 formal한 자리에서도 무난하게 사용 가능하다. 'excited'보다 조금 더 격한 뉘앙스를 준다.", "listening_tip": "'thrilled'의 'th' 발음은 혀를 이 사이에 살짝 넣어 내는 소리로, 한국인 학습자가 자주 't' 소리로 잘못 발음하는 부분이니 주의해야 한다.", "examples": [{"en": "I'm so thrilled that I got the job offer!", "ko": "취직 제안을 받아서 완전 신나!"}, {"en": "She was thrilled to see her favorite band live.", "ko": "그녀는 좋아하는 밴드를 실제로 봐서 완전 짜릿해했어."}], "timestamp": 1342}, {"expr": "brought me joy", "tag": "행복하게 해줬어, 기분 좋게 만들었어 (약간 감성적인 구어체)", "quote_en": "Like, it really brought me joy and it got me to wear something that I don't wear very often.", "quote_speaker": "화자", "context": "'bring someone joy'는 단순히 'made me happy'보다 조금 더 시적이고 따뜻한 느낌을 주는 표현으로, 소셜미디어나 브이로그에서 자신의 취미나 소소한 행복을 이야기할 때 자주 쓰인다. 정리 컨설턴트 곤도 마리에의 'spark joy'라는 표현이 유행하면서 이런 식의 어휘 사용이 Z세대 사이에서 더 흔해졌다. 일상적이지만 약간의 감성 포인트를 주고 싶을 때 사용하기 좋다. 진지한 자리보다는 브이로그, SNS 캡션 등에 잘 어울린다.", "listening_tip": "'brought'는 'brawt'처럼 발음되며 'ough' 부분이 '오' 소리로 축약되니 철자만 보고 발음을 유추하면 안 된다.", "examples": [{"en": "Cooking for my family really brings me joy.", "ko": "가족을 위해 요리하는 게 정말 행복하게 해줘."}, {"en": "That little café brought me so much joy today.", "ko": "그 작은 카페가 오늘 나를 정말 기분 좋게 만들었어."}], "timestamp": 1360}, {"expr": "that's pretty cool", "tag": "꽤 괜찮네, 나쁘지 않네 (캐주얼한 인정 표현)", "quote_en": "So, that's pretty cool.", "quote_speaker": "화자", "context": "'pretty'는 여기서 '예쁘다'가 아니라 '꽤, 상당히'라는 강조 부사로 쓰였다. 'pretty cool'은 대단하다고 확신하기보다는 살짝 겸손하게 인정하는 뉘앙스를 담고 있어 자기 자신에 대한 평가를 할 때도 자연스럽게 쓰인다. 미국 일상 회화에서 감탄사처럼 매우 자주 등장하는 표현으로, 격식 없는 자리에서 폭넓게 사용된다. 한국어의 '꽤 괜찮네' 정도로 이해하면 된다.", "listening_tip": "'pretty'는 강세가 첫 음절에 있어 '프리티'보다는 '프리 리'처럼 t 소리가 약화되어 들릴 수 있다.", "examples": [{"en": "You learned Korean in a year? That's pretty cool.", "ko": "1년 만에 한국어를 배웠다고? 그거 꽤 괜찮네."}, {"en": "This app tracks your sleep automatically, which is pretty cool.", "ko": "이 앱이 자동으로 수면을 기록해주는데, 꽤 괜찮아."}], "timestamp": 1380}, {"expr": "smudge it out", "tag": "번지게 하다, 문질러서 퍼뜨리다 (화장/메이크업 관련 구어체)", "quote_en": "Um, I might regret this, but I'll smudge it out and we'll see.", "quote_speaker": "화자", "context": "'smudge'는 원래 '얼룩, 번짐'을 뜻하는데 메이크업 튜토리얼이나 뷰티 브이로그에서는 아이라이너나 아이섀도우를 손가락이나 브러쉬로 문질러 자연스럽게 퍼뜨리는 행위를 가리키는 동사로 자주 쓰인다. 이 표현은 실수로 번진 상황이 아니라 의도적으로 스모키 효과를 낼 때도 사용된다. 유튜브 뷰티 콘텐츠를 자주 보는 학습자라면 꼭 알아둘 만한 실용 어휘다. 일상 대화보다는 뷰티 관련 콘텐츠에 특화된 표현이다.", "listening_tip": "'smudge'의 'dge' 부분은 '지'처럼 부드럽게 발음되며, 전체적으로 '스머쥐'에 가깝게 들린다.", "examples": [{"en": "I smudged out my eyeliner for a smoky look.", "ko": "스모키 룩을 위해 아이라이너를 번지게 했어."}, {"en": "Don't touch your face, you'll smudge your makeup.", "ko": "얼굴 만지지 마, 화장 번져."}], "timestamp": 1383}, {"expr": "vibe", "tag": "분위기, 느낌 (Z세대 필수 슬랭)", "quote_en": "The nails do not match the vibe tonight.", "quote_speaker": "화자", "context": "'vibe'는 Z세대가 가장 많이 쓰는 단어 중 하나로, 어떤 장소, 사람, 옷차림, 분위기 전반에서 느껴지는 전체적인 감성이나 무드를 의미한다. 원래는 'vibration'의 줄임말에서 왔지만 이제는 독립된 명사처럼 자유롭게 쓰인다. 'match the vibe'는 '분위기와 어울리다', '분위기에 맞다'는 뜻으로 패션, 인테리어, 음악 등 거의 모든 맥락에서 쓸 수 있다. 격식 없는 자리에서 매우 흔하게 쓰이며 한 단어로 감성적 판단을 전달할 수 있어 편리하다.", "listening_tip": "'vibe'는 한 음절로 짧고 강하게 발음되며 'v' 발음은 윗니로 아랫입술을 살짝 물듯이 내는 소리이다.", "examples": [{"en": "This restaurant has such a cozy vibe.", "ko": "이 레스토랑은 진짜 아늑한 분위기야."}, {"en": "Your outfit totally matches the vibe of the party.", "ko": "네 옷차림이 파티 분위기랑 완전 잘 어울려."}], "timestamp": 1405}], "video_title": "putting effort into my appearance for a week to see how it makes me feel", "channel_name": "emma chamberlain", "video_url": "https://www.youtube.com/watch?v=ir3xLtSZhek", "video_id": "ir3xLtSZhek"}</script>
 <script>
   // 보안 참고: 아래 데이터(data)는 유튜브 자막/LLM 생성 결과이며 신뢰할 수 없는 외부 콘텐츠다.
   // 저장형 XSS를 막기 위해 el()로 만든 요소는 전부 textContent만 쓰고, innerHTML은
@@ -160,13 +191,47 @@
 
   document.getElementById('scene').textContent = data.scene_summary;
 
+  const sourceEl = document.getElementById('source-line');
+  if (data.video_title) {
+    sourceEl.textContent = `${data.video_title} · ${data.channel_name || ''} · `;
+    const link = el('a', '', '원본 영상 보기');
+    link.href = data.video_url || `https://www.youtube.com/watch?v=${data.video_id}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    sourceEl.appendChild(link);
+    sourceEl.appendChild(el('span', '', ' · 표현 해설/번역은 AI가 생성했습니다.'));
+  } else {
+    sourceEl.textContent = 'AI가 생성한 번역과 해설입니다.';
+  }
+
+  function fmtTs(sec) {
+    return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+  }
+
+  function seek(ts) {
+    if (player && player.seekTo) {
+      player.seekTo(ts, true);
+      player.playVideo();
+    }
+  }
+
   const scriptEl = document.getElementById('script');
   const scriptLines = [];
   data.script.forEach((line) => {
     const row = el('div', 'script-line');
+    row.setAttribute('role', 'button');
+    row.setAttribute('tabindex', '0');
+    row.setAttribute('aria-label', `${fmtTs(line.timestamp)}${' '}지점으로 이동`);
     row.appendChild(el('div', 'speaker', line.speaker));
     row.appendChild(el('div', 'script-en', line.en));
     row.appendChild(el('div', 'script-ko', line.ko));
+    row.addEventListener('click', () => seek(line.timestamp));
+    row.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        seek(line.timestamp);
+      }
+    });
     scriptEl.appendChild(row);
     scriptLines.push({ ts: line.timestamp, el: row });
   });
@@ -181,26 +246,20 @@
       if (line.ts <= t) current = line; else break;
     }
     if (current && current.el !== activeLine) {
-      if (activeLine) activeLine.classList.remove('active');
+      if (activeLine) {
+        activeLine.classList.remove('active');
+        activeLine.removeAttribute('aria-current');
+      }
       current.el.classList.add('active');
+      current.el.setAttribute('aria-current', 'true');
       activeLine = current.el;
     }
   }, 400);
 
-  function fmtTs(sec) {
-    return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
-  }
-
-  function seek(ts) {
-    if (player && player.seekTo) {
-      player.seekTo(ts, true);
-      player.playVideo();
-    }
-  }
-
   function chevronIcon() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('class', 'chevron');
+    svg.setAttribute('aria-hidden', 'true');
     svg.setAttribute('width', '16');
     svg.setAttribute('height', '16');
     svg.setAttribute('viewBox', '0 0 24 24');
@@ -216,6 +275,14 @@
   data.expressions.forEach((e, i) => {
     const chip = el('a', 'jump-chip display', e.expr);
     chip.href = `#expr-${i}`;
+    chip.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const card = document.getElementById(`expr-${i}`);
+      card.open = true;
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      seek(e.timestamp);
+      card.querySelector('.expr').focus();
+    });
     jumpEl.appendChild(chip);
 
     const details = document.createElement('details');
@@ -227,7 +294,9 @@
     const main = el('div', 'card-top-main');
     main.appendChild(chevronIcon());
     const titleWrap = el('div');
-    titleWrap.appendChild(el('div', 'expr display', e.expr));
+    const exprTitle = el('div', 'expr display', e.expr);
+    exprTitle.setAttribute('tabindex', '-1');  // 점프 후 포커스 이동 대상(탭 순서에는 없음)
+    titleWrap.appendChild(exprTitle);
     titleWrap.appendChild(el('div', 'tag', e.tag));
     main.appendChild(titleWrap);
     summary.appendChild(main);

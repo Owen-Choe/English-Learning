@@ -12,6 +12,9 @@ import app
 def make_expression(**overrides):
     base = {
         "expr": "chef up",
+        "category": "casual_phrase",
+        "formality": "casual",
+        "workplace_safe": True,
         "tag": "요리하다 (캐주얼 표현)",
         "quote_en": "I sometimes chef up random things in my kitchen.",
         "quote_speaker": "화자",
@@ -127,6 +130,26 @@ class TestLessonModelDuplicatesAndFields:
         data["unexpected_field"] = "surprise"
         with pytest.raises(ValidationError):
             app.LessonModel.model_validate(data)
+
+
+class TestExpressionCategoryAndRegister:
+    def test_valid_category_and_register_pass(self):
+        exprs = [make_expression(expr=f"e{i}", category="workplace", formality="formal",
+                                  workplace_safe=True, timestamp=105 + i) for i in range(5)]
+        lesson = app.LessonModel.model_validate(make_lesson(expressions=exprs))
+        assert all(e.category == "workplace" for e in lesson.expressions)
+
+    def test_invalid_category_rejected(self):
+        exprs = [make_expression(expr=f"e{i}", category="not_a_real_category", timestamp=105 + i)
+                  for i in range(5)]
+        with pytest.raises(ValidationError):
+            app.LessonModel.model_validate(make_lesson(expressions=exprs))
+
+    def test_invalid_register_rejected(self):
+        exprs = [make_expression(expr=f"e{i}", formality="super-casual", timestamp=105 + i)
+                  for i in range(5)]
+        with pytest.raises(ValidationError):
+            app.LessonModel.model_validate(make_lesson(expressions=exprs))
 
 
 class TestQuoteVerification:

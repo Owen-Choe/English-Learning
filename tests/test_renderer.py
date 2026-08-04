@@ -60,3 +60,41 @@ class TestBuildDaysNav:
         nav = app.build_days_nav()
         i31, i30, i29 = nav.index("2026-07-31"), nav.index("2026-07-30"), nav.index("2026-07-29")
         assert i31 < i30 < i29
+
+
+class TestBuildDateNav:
+    def _make_days(self, tmp_path, monkeypatch, dates):
+        days_dir = tmp_path / "days"
+        days_dir.mkdir()
+        for d in dates:
+            (days_dir / f"{d}.html").write_text("x")
+        monkeypatch.setattr(app, "DAYS_DIR", str(days_dir))
+
+    def test_single_day_index_has_no_nav(self, tmp_path, monkeypatch):
+        self._make_days(tmp_path, monkeypatch, ["2026-07-29"])
+        assert app.build_date_nav(None, is_days_page=False) == ""
+
+    def test_latest_day_next_is_disabled(self, tmp_path, monkeypatch):
+        self._make_days(tmp_path, monkeypatch, ["2026-07-29", "2026-07-30", "2026-07-31"])
+        nav = app.build_date_nav("2026-07-31", is_days_page=True)
+        assert 'disabled" aria-disabled="true">다음 학습' in nav
+        assert 'href="2026-07-30.html">← 이전 학습' in nav
+        assert 'href="../index.html">전체 학습' in nav
+
+    def test_oldest_day_prev_is_disabled(self, tmp_path, monkeypatch):
+        self._make_days(tmp_path, monkeypatch, ["2026-07-29", "2026-07-30", "2026-07-31"])
+        nav = app.build_date_nav("2026-07-29", is_days_page=True)
+        assert 'disabled" aria-disabled="true">← 이전 학습' in nav
+        assert 'href="2026-07-30.html">다음 학습' in nav
+
+    def test_middle_day_has_both_links(self, tmp_path, monkeypatch):
+        self._make_days(tmp_path, monkeypatch, ["2026-07-29", "2026-07-30", "2026-07-31"])
+        nav = app.build_date_nav("2026-07-30", is_days_page=True)
+        assert 'href="2026-07-29.html">← 이전 학습' in nav
+        assert 'href="2026-07-31.html">다음 학습' in nav
+
+    def test_index_page_links_into_days_subfolder(self, tmp_path, monkeypatch):
+        self._make_days(tmp_path, monkeypatch, ["2026-07-29", "2026-07-30"])
+        nav = app.build_date_nav(None, is_days_page=False)
+        assert 'href="days/2026-07-29.html">← 이전 학습' in nav
+        assert 'href="index.html">전체 학습' in nav

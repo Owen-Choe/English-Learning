@@ -1,4 +1,12 @@
 {
+  "Af6i6ChAVTw": {
+    "last_attempted_at": "2026-08-09T11:38:56.239346+09:00",
+    "status": "llm_validation_failed"
+  },
+  "CTYY7c3Iln0": {
+    "last_attempted_at": "2026-08-09T11:41:12.870272+09:00",
+    "status": "processed"
+  },
   "d1Lnp08XTSk": {
     "last_attempted_at": "2026-07-31T20:03:39.440870+09:00",
     "status": "processed"

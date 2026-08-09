@@ -17,5 +17,24 @@
       "This is a catastrophe",
       "I'm not kidding"
     ]
+  },
+  {
+    "date": "2026-08-09",
+    "video_id": "CTYY7c3Iln0",
+    "video_title": "met gala anxiety",
+    "channel_name": "emma chamberlain",
+    "expression_count": 7,
+    "categories": [
+      "casual_phrase",
+      "discourse_marker",
+      "phrasal_verb",
+      "slang",
+      "workplace"
+    ],
+    "top_expressions": [
+      "Nothing I can say",
+      "let it out",
+      "I mean"
+    ]
   }
 ]

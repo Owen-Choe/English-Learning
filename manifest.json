@@ -36,5 +36,24 @@
       "let it out",
       "I mean"
     ]
+  },
+  {
+    "date": "2026-08-16",
+    "video_id": "LiH-P4rSkLI",
+    "video_title": "Can You Pass This Classroom Quiz?",
+    "channel_name": "MrBeast",
+    "expression_count": 8,
+    "categories": [
+      "casual_phrase",
+      "cultural_expression",
+      "discourse_marker",
+      "idiom",
+      "natural_phrase"
+    ],
+    "top_expressions": [
+      "a ton of money",
+      "How's it going",
+      "skedaddle"
+    ]
   }
 ]

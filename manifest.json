@@ -55,5 +55,25 @@
       "How's it going",
       "skedaddle"
     ]
+  },
+  {
+    "date": "2026-08-19",
+    "video_id": "Fep-PiKQgAg",
+    "video_title": "How I make money",
+    "channel_name": "David Dobrik",
+    "expression_count": 8,
+    "categories": [
+      "casual_phrase",
+      "discourse_marker",
+      "humor_sarcasm",
+      "idiom",
+      "natural_phrase",
+      "workplace"
+    ],
+    "top_expressions": [
+      "Who's the bad friend?",
+      "block your number",
+      "literally like psychotic"
+    ]
   }
 ]

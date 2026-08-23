@@ -114,21 +114,20 @@
   },
   {
     "date": "2026-08-23",
-    "video_id": "Qtl8lJwbd4g",
-    "video_title": "Escape 100 Cops, Win $500,000",
-    "channel_name": "MrBeast",
-    "expression_count": 8,
+    "video_id": "yibDNX32MR0",
+    "video_title": "We threw a celebrity pool party",
+    "channel_name": "David Dobrik",
+    "expression_count": 7,
     "categories": [
-      "casual_phrase",
-      "natural_phrase",
-      "phrasal_verb",
-      "slang",
-      "workplace"
+      "cultural_expression",
+      "idiom",
+      "listening_pattern",
+      "natural_phrase"
     ],
     "top_expressions": [
-      "chicken out",
-      "I beg you",
-      "This is a horrible idea"
+      "anxiety through the roof",
+      "cart girls",
+      "I think it's cuz"
     ]
   }
 ]

@@ -31,6 +31,10 @@
     "last_attempted_at": "2026-08-23T09:58:43.537469+09:00",
     "status": "processed"
   },
+  "Tk58ZuCaYoc": {
+    "last_attempted_at": "2026-08-24T22:00:36.286817+09:00",
+    "status": "processed"
+  },
   "d1Lnp08XTSk": {
     "last_attempted_at": "2026-07-31T20:03:39.440870+09:00",
     "status": "processed"
@@ -47,9 +51,17 @@
     "last_attempted_at": "2026-07-31T20:25:08.135546+09:00",
     "status": "processed"
   },
+  "jCccPEsas0I": {
+    "last_attempted_at": "2026-08-24T21:58:22.764981+09:00",
+    "status": "llm_validation_failed"
+  },
   "lVylRtlPOIE": {
     "last_attempted_at": "2026-07-31T20:03:39.440870+09:00",
     "status": "processed"
+  },
+  "nO2dMO3BUO4": {
+    "last_attempted_at": "2026-08-24T21:56:03.087219+09:00",
+    "status": "llm_validation_failed"
   },
   "oqYIu4rK_CY": {
     "last_attempted_at": "2026-07-31T20:05:58.360428+09:00",

@@ -1063,6 +1063,22 @@ def mark_seen(seen: dict, video_id: str, status: str) -> None:
     save_seen(seen)
 
 
+# 영상 자체의 속성이라 다시 시도해도 결과가 같은 상태들. 나머지(llm_validation_failed 등)는
+# 모델/네트워크 사정이라 언젠가 통과할 수 있으므로 영구 제외하지 않는다.
+FINAL_STATUSES = {"processed", "no_transcript", "transcript_disabled"}
+
+
+def rank_candidates(video_ids: list, seen: dict) -> list:
+    """처음 보는 영상을 먼저, 예전에 실패했지만 재시도할 만한 영상을 뒤에 놓는다.
+    실패를 영구 블랙리스트로 취급하면 후보 풀이 한 방향으로만 줄어들어, 일시적인 문제로
+    떨어진 멀쩡한 영상이 영영 안 쓰인다. 순서로만 밀어두면 새 영상이 있는 날은 예전과
+    똑같이 동작하고, 후보가 마른 날에만 재시도가 일어난다."""
+    fresh = [v for v in video_ids if v not in seen]
+    retryable = [v for v in video_ids
+                 if v in seen and seen[v].get("status") not in FINAL_STATUSES]
+    return fresh + retryable
+
+
 MIN_DURATION_SEC = 60  # 1분 미만 영상(쇼츠 등) 제외
 
 
@@ -1212,12 +1228,12 @@ def run_daily(client) -> str | None:
     if topic_issue:
         query = topic_issue["title"].strip()
         print(f"[데일리] 신청된 관심사 반영: {query!r}")
-        candidates = [v for v in search_by_keyword(yt_api_key, query) if v not in seen]
+        candidates = rank_candidates(search_by_keyword(yt_api_key, query), seen)
         if not candidates:
             print("  관심사로는 적합한 영상을 못 찾아 평소 채널 목록으로 대체합니다.")
 
     if not candidates:
-        candidates = [v for v in search_daily_candidates(yt_api_key) if v not in seen]
+        candidates = rank_candidates(search_daily_candidates(yt_api_key), seen)
     if not candidates:
         print("[데일리] 새 후보 영상이 없습니다. 오늘은 건너뜁니다.")
         return None

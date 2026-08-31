@@ -199,3 +199,26 @@ class TestQuoteMatching:
     ])
     def test_fabricated_quote_rejected(self, quote):
         assert not app._quote_in_words(quote, self.words())
+
+
+class TestCandidateRanking:
+    SEEN = {
+        "done": {"status": "processed"},
+        "nosub": {"status": "no_transcript"},
+        "offsub": {"status": "transcript_disabled"},
+        "flaked": {"status": "llm_validation_failed"},
+    }
+
+    def test_fresh_videos_come_first(self):
+        got = app.rank_candidates(["flaked", "new1", "new2"], self.SEEN)
+        assert got == ["new1", "new2", "flaked"]
+
+    def test_video_level_failures_never_retried(self):
+        got = app.rank_candidates(["done", "nosub", "offsub"], self.SEEN)
+        assert got == []
+
+    def test_transient_failure_is_retryable(self):
+        assert app.rank_candidates(["flaked"], self.SEEN) == ["flaked"]
+
+    def test_empty_seen_keeps_original_order(self):
+        assert app.rank_candidates(["a", "b", "c"], {}) == ["a", "b", "c"]

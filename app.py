@@ -189,12 +189,34 @@ def _normalize_for_match(text: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", text.lower())).strip()
 
 
+def _quote_in_words(quote: str, hay_words: list) -> bool:
+    """quote의 단어들이 자막에 같은 순서로 등장하는지 본다.
+    자동 자막에는 말더듬("who your who your client")과 filler가 섞여 있어서 LLM이 그걸 정리해
+    인용하는데, 완전일치로 대조하면 멀쩡한 인용까지 전부 탈락한다. 대신 매칭 구간을
+    quote 길이의 2배로 묶어, 자막 여기저기 흩어진 단어를 짜깁기한 환각은 계속 걸러낸다."""
+    q = _normalize_for_match(quote).split()
+    if not q:
+        return False
+    limit = 2 * len(q) + 4
+    for start in range(len(hay_words)):
+        if hay_words[start] != q[0]:
+            continue
+        qi, hi = 0, start
+        while qi < len(q) and hi < len(hay_words) and hi - start < limit:
+            if hay_words[hi] == q[qi]:
+                qi += 1
+            hi += 1
+        if qi == len(q):
+            return True
+    return False
+
+
 def verify_quotes_against_transcript(lesson: LessonModel, plain_transcript: str) -> None:
-    """quote_en이 실제 자막에 존재하는 문장인지 대조한다(대소문자/구두점 차이는 허용).
+    """quote_en이 실제 자막에 존재하는 문장인지 대조한다(대소문자/구두점/말더듬 차이는 허용).
     LLM이 지어낸 인용문을 걸러내기 위함."""
-    haystack = _normalize_for_match(plain_transcript)
+    hay_words = _normalize_for_match(plain_transcript).split()
     for e in lesson.expressions:
-        if _normalize_for_match(e.quote_en) not in haystack:
+        if not _quote_in_words(e.quote_en, hay_words):
             raise PipelineError(f"'{e.quote_en}' 문장이 실제 자막에서 확인되지 않는다.", reason="llm_validation_failed")
 
 
@@ -290,8 +312,22 @@ def call_llm(client, transcript) -> LessonModel:
 
     last_error = None
     for attempt in range(2):
-        resp = client.messages.create(model=MODEL, max_tokens=8000, messages=messages)
-        raw = next(b.text for b in resp.content if b.type == "text")
+        # Sonnet 5는 thinking이 기본 on이라 max_tokens 8000으로는 thinking만 하다 잘려서
+        # 텍스트 블록이 안 나온다. effort=low는 속도가 아니라 thinking 토큰 비용을 줄이는 용도
+        # (측정상 소요시간 차이는 1% 미만이고, 55초는 대부분 JSON 본문 생성 시간이다).
+        resp = client.messages.create(
+            model=MODEL,
+            max_tokens=16000,
+            output_config={"effort": "low"},
+            messages=messages,
+        )
+        text_blocks = [b.text for b in resp.content if b.type == "text"]
+        if not text_blocks:
+            print(
+                f"[call_llm] 텍스트 블록 없음: stop_reason={resp.stop_reason!r} content={resp.content!r}",
+                file=sys.stderr,
+            )
+        raw = text_blocks[0] if text_blocks else ""
         try:
             data = json.loads(extract_json(raw))
             lesson = LessonModel.model_validate(data)
@@ -1062,7 +1098,7 @@ def fetch_video_metadata(api_key: str, video_ids: list) -> dict:
             continue
         for item in resp.json().get("items", []):
             meta[item["id"]] = {
-                "duration_sec": parse_iso8601_duration(item["contentDetails"]["duration"]),
+                "duration_sec": parse_iso8601_duration(item.get("contentDetails", {}).get("duration", "")),
                 "audio_lang": item["snippet"].get("defaultAudioLanguage", ""),
                 "channel_id": item["snippet"]["channelId"],
             }

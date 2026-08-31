@@ -167,3 +167,35 @@ class TestQuoteVerification:
         lesson = app.LessonModel.model_validate(make_lesson(expressions=exprs))
         with pytest.raises(app.PipelineError):
             app.verify_quotes_against_transcript(lesson, "completely unrelated transcript text")
+
+
+class TestQuoteMatching:
+    """자동 자막에는 말더듬/filler가 그대로 들어있고 LLM은 그걸 정리해서 인용한다.
+    정리된 인용은 통과시키되, 지어낸 문장은 계속 막아야 한다."""
+
+    # 실제 자동 자막에서 가져온 말더듬 패턴
+    TRANSCRIPT = (
+        "first of all you should be focusing you should know who who your who your client is "
+        "and who you want your client to be more than anything "
+        "you ll be like since it s music on the come up you ll be like it s cool but you missed"
+    )
+
+    def words(self):
+        return app._normalize_for_match(self.TRANSCRIPT).split()
+
+    @pytest.mark.parametrize("quote", [
+        "you should be focusing",
+        "You should know who your client is and who you want your client to be",  # 말더듬 제거
+        'since it\'s on the come up, you\'ll be like, "It\'s cool, but you missed"',  # filler 제거
+    ])
+    def test_cleaned_up_quote_accepted(self, quote):
+        assert app._quote_in_words(quote, self.words())
+
+    @pytest.mark.parametrize("quote", [
+        "I bought a rocket ship to Mars last Tuesday",  # 완전 환각
+        "focusing client brand you missed anything",    # 흩어진 단어 짜깁기
+        "to be client your want you",                   # 순서 뒤집힘
+        "",                                             # 빈 문자열
+    ])
+    def test_fabricated_quote_rejected(self, quote):
+        assert not app._quote_in_words(quote, self.words())

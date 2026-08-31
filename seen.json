@@ -3,6 +3,10 @@
     "last_attempted_at": "2026-08-23T21:52:07.422035+09:00",
     "status": "transcript_disabled"
   },
+  "ACoJ17Pxkfs": {
+    "last_attempted_at": "2026-08-31T22:44:54.991920+09:00",
+    "status": "processed"
+  },
   "Af6i6ChAVTw": {
     "last_attempted_at": "2026-08-09T11:38:56.239346+09:00",
     "status": "llm_validation_failed"
@@ -11,9 +15,17 @@
     "last_attempted_at": "2026-08-09T11:41:12.870272+09:00",
     "status": "processed"
   },
+  "DJQmGYH7hdU": {
+    "last_attempted_at": "2026-08-31T22:38:01.468348+09:00",
+    "status": "llm_validation_failed"
+  },
   "Fep-PiKQgAg": {
     "last_attempted_at": "2026-08-19T22:20:43.799502+09:00",
     "status": "processed"
+  },
+  "Hhl74xWssbU": {
+    "last_attempted_at": "2026-08-31T22:40:55.287376+09:00",
+    "status": "llm_validation_failed"
   },
   "LiH-P4rSkLI": {
     "last_attempted_at": "2026-08-16T22:06:36.742036+09:00",

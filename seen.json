@@ -3,6 +3,10 @@
     "last_attempted_at": "2026-08-23T21:52:07.422035+09:00",
     "status": "transcript_disabled"
   },
+  "11hY9shQ0vY": {
+    "last_attempted_at": "2026-09-01T21:14:54.976066+09:00",
+    "status": "processed"
+  },
   "ACoJ17Pxkfs": {
     "last_attempted_at": "2026-08-31T22:44:54.991920+09:00",
     "status": "processed"
@@ -86,6 +90,10 @@
   "oqYIu4rK_CY": {
     "last_attempted_at": "2026-07-31T20:05:58.360428+09:00",
     "status": "processed"
+  },
+  "rkdzxRaI68g": {
+    "last_attempted_at": "2026-09-01T21:13:55.309882+09:00",
+    "status": "llm_validation_failed"
   },
   "sHj-IBU_zRY": {
     "last_attempted_at": "2026-08-24T22:34:13.207464+09:00",

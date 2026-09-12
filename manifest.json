@@ -277,5 +277,26 @@
       "you're tripping",
       "get off the boat"
     ]
+  },
+  {
+    "date": "2026-09-12",
+    "video_id": "gTKS8SAwUzE",
+    "video_title": "I Survived The Most Extreme Places On Earth",
+    "channel_name": "MrBeast",
+    "expression_count": 8,
+    "categories": [
+      "discourse_marker",
+      "humor_sarcasm",
+      "idiom",
+      "listening_pattern",
+      "natural_phrase",
+      "phrasal_verb",
+      "slang"
+    ],
+    "top_expressions": [
+      "hence, why",
+      "fair share of",
+      "an expert in well… everything"
+    ]
   }
 ]

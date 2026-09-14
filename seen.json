@@ -11,6 +11,10 @@
     "last_attempted_at": "2026-09-03T21:37:13.276461+09:00",
     "status": "processed"
   },
+  "5CPAtEmHAio": {
+    "last_attempted_at": "2026-09-14T22:56:57.271680+09:00",
+    "status": "processed"
+  },
   "ACoJ17Pxkfs": {
     "last_attempted_at": "2026-08-31T22:44:54.991920+09:00",
     "status": "processed"
@@ -62,6 +66,10 @@
   "Tk58ZuCaYoc": {
     "last_attempted_at": "2026-08-24T22:00:36.286817+09:00",
     "status": "processed"
+  },
+  "WwZx1LvNwas": {
+    "last_attempted_at": "2026-09-14T22:55:16.913862+09:00",
+    "status": "llm_validation_failed"
   },
   "aYmkOO-c0WI": {
     "last_attempted_at": "2026-08-29T19:09:20.361788+09:00",

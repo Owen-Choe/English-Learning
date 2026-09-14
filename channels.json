@@ -13,5 +13,10 @@
   {"handle": "FirstWeFeast", "enabled": true},
   {"handle": "AmeliaDimoldenberg", "enabled": true},
   {"handle": "CleoAbram", "enabled": true},
-  {"handle": "SydneySerena", "enabled": true}
+  {"handle": "SydneySerena", "enabled": true},
+  {"handle": "lexfridman", "enabled": true},
+  {"handle": "ycombinator", "enabled": true},
+  {"handle": "a16z", "enabled": true},
+  {"handle": "TED", "enabled": true},
+  {"handle": "bloombergoriginals", "enabled": true}
 ]

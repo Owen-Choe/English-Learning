@@ -317,5 +317,23 @@
       "too easy",
       "I'm sleep"
     ]
+  },
+  {
+    "date": "2026-09-15",
+    "video_id": "Dt36OGjw26Y",
+    "video_title": "Don't Quit",
+    "channel_name": "Kai Cenat",
+    "expression_count": 6,
+    "categories": [
+      "discourse_marker",
+      "listening_pattern",
+      "natural_phrase",
+      "workplace"
+    ],
+    "top_expressions": [
+      "on beat drop",
+      "that's the goal",
+      "I can't shorten it"
+    ]
   }
 ]

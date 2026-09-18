@@ -335,5 +335,24 @@
       "that's the goal",
       "I can't shorten it"
     ]
+  },
+  {
+    "date": "2026-09-18",
+    "video_id": "5mfOWHqC5OY",
+    "video_title": "This was a bad idea",
+    "channel_name": "David Dobrik",
+    "expression_count": 7,
+    "categories": [
+      "casual_phrase",
+      "discourse_marker",
+      "natural_phrase",
+      "phrasal_verb",
+      "slang"
+    ],
+    "top_expressions": [
+      "we're all screwed",
+      "hot as [ __ ]",
+      "put that together"
+    ]
   }
 ]

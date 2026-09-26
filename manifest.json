@@ -374,5 +374,24 @@
       "I think you're stuck",
       "I'm about to leave you here"
     ]
+  },
+  {
+    "date": "2026-09-26",
+    "video_id": "v9QtM6qnG50",
+    "video_title": "I Built A City To Save Kids From Illegal Labor",
+    "channel_name": "MrBeast",
+    "expression_count": 8,
+    "categories": [
+      "casual_phrase",
+      "cultural_expression",
+      "listening_pattern",
+      "natural_phrase",
+      "workplace"
+    ],
+    "top_expressions": [
+      "act like",
+      "jawn",
+      "ain't goin' nowhere"
+    ]
   }
 ]

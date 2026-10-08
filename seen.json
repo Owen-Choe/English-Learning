@@ -139,6 +139,10 @@
     "last_attempted_at": "2026-07-31T20:05:58.360428+09:00",
     "status": "processed"
   },
+  "plN7JMbadRg": {
+    "last_attempted_at": "2026-10-08T23:42:21.792166+09:00",
+    "status": "processed"
+  },
   "rkdzxRaI68g": {
     "last_attempted_at": "2026-09-01T21:13:55.309882+09:00",
     "status": "llm_validation_failed"

@@ -446,5 +446,23 @@
       "I have NOO idea",
       "go bad"
     ]
+  },
+  {
+    "date": "2026-10-11",
+    "video_id": "_LHh3BS9Xx4",
+    "video_title": "I Hid In MrBeast's Grocery Store",
+    "channel_name": "Airrack",
+    "expression_count": 6,
+    "categories": [
+      "cultural_expression",
+      "idiom",
+      "natural_phrase",
+      "phrasal_verb"
+    ],
+    "top_expressions": [
+      "secret shopping spree",
+      "slip up",
+      "bought that"
+    ]
   }
 ]

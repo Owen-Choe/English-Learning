@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘의 학습 (Daily)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --violet: #7C5CFC; --amber: #F5A623; --teal: #2DD4C6; --green: #34D399;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px 80px;
+    background: #0f0f14; color: #f2f2f5;
+    font-family: -apple-system, "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+  }
+  .display { font-family: "Space Grotesk", -apple-system, "Apple SD Gothic Neo", sans-serif; }
+  .skip-link {
+    position: absolute; left: -999px; top: 0; background: var(--violet); color: #fff;
+    padding: 10px 16px; border-radius: 0 0 8px 0; z-index: 100; text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .sticky-col {
+    position: sticky; top: 0; z-index: 10;
+    background: #0f0f14; padding: 10px 0; margin: 0 0 -10px;
+  }
+  @media (max-width: 700px) {
+    .sticky-col { position: static; }
+  }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .sub { color: #9a9aa5; margin: 0 0 28px; font-size: 15px; }
+  .source-line { color: #9a9aa5; font-size: 13px; margin: 10px 0 0; line-height: 1.6; }
+  .source-line a { color: #9479fc; }
+  .date-nav { display: flex; gap: 8px; margin: 18px 0 28px; }
+  .date-nav-btn {
+    flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center;
+    text-align: center; font-size: 13px; color: #d7d7de; background: #1a1a22;
+    border: 1px solid #2b2b36; border-radius: 10px; text-decoration: none; padding: 0 10px;
+    transition: border-color .15s, color .15s;
+  }
+  .date-nav-btn:hover { border-color: var(--violet); color: #fff; }
+  .date-nav-btn.disabled { color: #4a4a55; pointer-events: none; }
+  .player-box {
+    position: relative; width: 100%; aspect-ratio: 16/9;
+    border-radius: 16px; overflow: hidden; background: #000;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+  }
+  #player { width: 100%; height: 100%; }
+  .hint { text-align: center; color: #8f8f9a; font-size: 13px; margin: 10px 0 32px; }
+  .badge { font-size: 12px; color: #9479fc; font-weight: 700;
+           letter-spacing: .04em; margin-bottom: 10px; }
+  .section-title { display: flex; align-items: center; gap: 8px; font-weight: 700;
+                    font-size: 18px; margin: 40px 0 14px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dot-violet { background: var(--violet); }
+  .dot-amber { background: var(--amber); }
+  .dot-teal { background: var(--teal); }
+  .dot-green { background: var(--green); }
+  .scene-box {
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px;
+    padding: 18px 22px; color: #d7d7de; font-size: 15px; line-height: 1.6;
+  }
+  .script-box {
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px;
+    padding: 6px 22px;
+  }
+  .script-line {
+    padding: 14px 12px; margin: 0 -12px; border-bottom: 1px solid #24242e;
+    border-radius: 8px; border-left: 3px solid transparent; cursor: pointer;
+    min-height: 44px;
+  }
+  .script-line:last-child { border-bottom: none; }
+  .script-line:hover { background: #ffffff08; }
+  .script-line.active { background: #7c5cfc1a; border-left-color: var(--violet); }
+  .speaker { font-size: 12px; font-weight: 700; color: var(--violet); letter-spacing: .04em; }
+  .script-en { font-size: 16px; color: #fff; margin: 4px 0 2px; }
+  .script-ko { font-size: 13px; color: #8f8f9a; }
+  body[data-sub-mode="en"] .script-ko { display: none; }
+  body[data-sub-mode="hidden"] .script-box { display: none; }
+
+  .player-controls {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    gap: 10px; margin: 14px 0 0;
+  }
+  .control-group, .subtitle-mode { display: flex; gap: 6px; flex-wrap: wrap; }
+  .subtitle-mode { margin: 0 0 14px; }
+  .speed-btn, .loop-btn, .mode-btn {
+    min-height: 36px; font-size: 12px; font-weight: 700; color: #d7d7de;
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 999px;
+    padding: 0 14px; cursor: pointer; font-family: inherit;
+  }
+  .speed-btn.active, .loop-btn.active, .mode-btn.active {
+    color: #fff; border-color: var(--violet); background: #7c5cfc26;
+  }
+
+  .jump-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .jump-chip {
+    font-size: 13px; color: #d7d7de; background: #1a1a22; border: 1px solid #2b2b36;
+    border-radius: 999px; padding: 6px 14px; text-decoration: none; white-space: nowrap;
+    transition: border-color .15s, color .15s;
+  }
+  .jump-chip:hover { border-color: var(--violet); color: #fff; }
+
+  .card {
+    display: block; background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px;
+    padding: 0; margin-bottom: 14px; transition: border-color .15s;
+    scroll-margin-top: 76px;
+  }
+  .card:hover { border-color: var(--violet); }
+  .card-top {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 20px 22px; cursor: pointer; list-style: none;
+  }
+  .card-top::-webkit-details-marker { display: none; }
+  .card-top-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .chevron { color: #6f6f7a; transition: transform .2s; flex-shrink: 0; }
+  details[open] > .card-top .chevron { transform: rotate(180deg); }
+  .expr-meta { display: flex; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
+  .category-badge, .workplace-warning {
+    font-size: 10px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px;
+  }
+  .category-badge { color: #9479fc; background: #7c5cfc1a; }
+  .workplace-warning { color: var(--amber); background: #f5a62326; }
+  .expr { font-size: 22px; font-weight: 700; color: #fff; }
+  .expr:focus { outline: 2px solid var(--violet); outline-offset: 4px; }
+  .tag { font-size: 14px; color: #9a9aa5; margin-top: 4px; }
+  .ts {
+    font-size: 12px; font-weight: 700; color: var(--violet); background: #7c5cfc1a;
+    padding: 5px 11px; border-radius: 999px; white-space: nowrap; border: none;
+    cursor: pointer; font-family: inherit;
+  }
+  .ts:hover { background: #7c5cfc33; }
+  .card-body { padding: 0 22px 22px; }
+  .subbox {
+    background: #14141a; border-radius: 10px; padding: 12px 16px; margin-top: 14px;
+    border-left: 3px solid transparent;
+  }
+  .subbox-quote { border-left-color: var(--violet); }
+  .subbox-context { border-left-color: var(--amber); }
+  .subbox-tip { border-left-color: var(--teal); }
+  .subbox-example { border-left-color: var(--green); }
+  .subbox-label { font-size: 11px; font-weight: 700; letter-spacing: .04em;
+                   text-transform: uppercase; margin-bottom: 6px; }
+  .subbox-quote .subbox-label { color: var(--violet); }
+  .subbox-context .subbox-label { color: var(--amber); }
+  .subbox-tip .subbox-label { color: var(--teal); }
+  .subbox-example .subbox-label { color: var(--green); }
+  .quote { font-style: italic; color: #fff; font-size: 15px; }
+  .quote-speaker { color: #8f8f9a; font-size: 12px; margin-top: 4px; }
+  .context, .tip { color: #c3c3cc; font-size: 14px; line-height: 1.6; }
+  .example { margin-top: 8px; }
+  .example .en { color: #fff; font-size: 14px; }
+  .example .ko { color: #8f8f9a; font-size: 13px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  .quiz-box {
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px; padding: 20px 22px;
+  }
+  .quiz-q { margin-bottom: 22px; }
+  .quiz-q:last-child { margin-bottom: 0; }
+  .quiz-question { font-size: 15px; color: #f2f2f5; margin-bottom: 12px; line-height: 1.5; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-option {
+    min-height: 44px; text-align: left; font-size: 14px; color: #d7d7de;
+    background: #14141a; border: 1px solid #2b2b36; border-radius: 10px;
+    padding: 10px 14px; cursor: pointer; font-family: inherit;
+  }
+  .quiz-option:hover { border-color: var(--violet); }
+  .quiz-option.correct { border-color: var(--green); background: #34d39926; }
+  .quiz-option.wrong { border-color: #e5484d; background: #e5484d26; }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-result {
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px;
+    padding: 18px 22px; margin-top: 14px; color: #d7d7de; font-size: 14px; line-height: 1.7;
+  }
+
+  a:focus-visible, button:focus-visible, summary:focus-visible, [role="button"]:focus-visible {
+    outline: 2px solid var(--violet); outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">본문 바로가기</a>
+<div class="wrap">
+  <header>
+    <div class="badge display">TODAY'S LEARNING · DAILY</div>
+    <h1 class="display">오늘의 Gen Z 표현</h1>
+    <p class="sub">17:38 ~ 18:45 구간에서 뽑은 표현 6개</p>
+    <nav class="date-nav" aria-label="날짜 이동"><a class="date-nav-btn" href="2026-10-08.html">← 이전 학습</a><a class="date-nav-btn" href="../index.html">전체 학습</a><span class="date-nav-btn disabled" aria-disabled="true">다음 학습 →</span></nav>
+  </header>
+
+  <main id="main">
+    <div class="sticky-col">
+      <div class="player-box"><div id="player"></div></div>
+    </div>
+    <p class="source-line" id="source-line"></p>
+    <div class="player-controls">
+      <div class="control-group" role="group" aria-label="재생 속도" id="speed-group">
+        <button type="button" class="speed-btn" data-rate="0.75">0.75x</button>
+        <button type="button" class="speed-btn active" data-rate="1">1x</button>
+        <button type="button" class="speed-btn" data-rate="1.25">1.25x</button>
+      </div>
+      <button type="button" class="loop-btn" id="loop-toggle" aria-pressed="false">구간 반복</button>
+    </div>
+    <p class="hint">타임스탬프를 클릭하면 그 표현이 나오는 순간으로 이동합니다. 자동재생이 차단되면 영상을 한 번 클릭해주세요.</p>
+
+    <h2 class="section-title"><span class="dot dot-violet" aria-hidden="true"></span>오늘의 장면</h2>
+    <div class="scene-box" id="scene"></div>
+
+    <h2 class="section-title"><span class="dot dot-teal" aria-hidden="true"></span>스크립트</h2>
+    <div class="subtitle-mode" role="group" aria-label="자막 모드" id="subtitle-mode">
+      <button type="button" class="mode-btn" data-mode="en">영어만</button>
+      <button type="button" class="mode-btn active" data-mode="both">영어+한국어</button>
+      <button type="button" class="mode-btn" data-mode="hidden">자막 숨기기</button>
+    </div>
+    <div class="script-box" id="script"></div>
+
+    <h2 class="section-title"><span class="dot dot-green" aria-hidden="true"></span>오늘의 표현</h2>
+    <nav class="jump-row" id="jump-row" aria-label="표현 바로가기"></nav>
+    <div id="cards"></div>
+
+    <h2 class="section-title"><span class="dot dot-amber" aria-hidden="true"></span>오늘의 복습 퀴즈</h2>
+    <div class="quiz-box" id="quiz"></div>
+
+  </main>
+
+  
+</div>
+
+<script id="expr-data" type="application/json">{"scene_summary": "Airrack가 믹스터 비스트의 식료품점 영상에 가짜 카메라맨으로 잠입해 숨어 지내는 장면이다. 냉동고 안에 위장한 상자 집을 만들어 숨어있다가 식량을 구하러 나오고, 참가자 중 한 명인 Russell인 척 연기하며 들키지 않으려 애쓴다. 긴장감 넘치는 추격과 변명이 이어진다.", "start_sec": 1058, "end_sec": 1125, "script": [{"speaker": "Airrack", "en": "Look at all this food. I need like a bag or something. I'll take some of these. Oh, they're not looking at me. I'm just a cameraman getting food in the grocery store.", "ko": "이 음식들 좀 봐. 가방 같은 게 필요해. 몇 개 챙겨야겠다. 오, 나를 안 보고 있네. 난 그냥 식료품점에서 먹을 거 챙기는 카메라맨일 뿐이야.", "timestamp": 1059}, {"speaker": "Airrack", "en": "I only got breakfast bars because they're standing next to everything else.", "ko": "다른 것들 옆에 서 있어서 그냥 아침식사 바만 챙겼어.", "timestamp": 1072}, {"speaker": "화자", "en": "But as I was in the middle of my secret shopping spree, one of the contestants noticed me.", "ko": "하지만 내가 비밀 쇼핑을 하는 도중, 참가자 중 한 명이 나를 발견했다.", "timestamp": 1078}, {"speaker": "참가자", "en": "What's up, dude? How you doing?", "ko": "야 잘 지내? 어떻게 지내?", "timestamp": 1084}, {"speaker": "Airrack", "en": "I had two options. A, walk away and look suspicious, or B, introduce myself and hope I didn't slip up.", "ko": "두 가지 선택지가 있었다. A, 그냥 걸어가서 수상해 보이거나, B, 자기소개를 하고 실수하지 않기를 바라는 것.", "timestamp": 1085}, {"speaker": "Airrack", "en": "I'm uh Russell. How you doing? Great to meet you. You're Jackson? Great to meet you.", "ko": "어, 나는 러셀이야. 어떻게 지내? 만나서 반가워. 네가 잭슨이야? 만나서 반가워.", "timestamp": 1094}, {"speaker": "화자", "en": "Now, I tried to get out of that situation as fast as I could, but this guy would not stop asking me questions.", "ko": "이제 나는 그 상황에서 최대한 빨리 벗어나려 했지만, 이 친구는 계속 질문을 해댔다.", "timestamp": 1099}, {"speaker": "Airrack", "en": "Yeah, I'm just getting some B-roll. Yeah, I'll be around the next few days.", "ko": "응, 그냥 보조 영상(B-roll) 좀 찍고 있어. 응, 앞으로 며칠 더 있을 거야.", "timestamp": 1106}, {"speaker": "Airrack", "en": "Oh my gosh, that was way too close. I didn't know if this guy bought that or not, but I was not going to stick around and find out.", "ko": "오 세상에, 너무 아슬아슬했다. 이 친구가 믿었는지 안 믿었는지 몰랐지만, 확인하려고 그 자리에 머물 생각은 없었다.", "timestamp": 1110}, {"speaker": "Airrack", "en": "So I decided to just go back into my hiding spot as soon as possible.", "ko": "그래서 최대한 빨리 숨은 곳으로 돌아가기로 했다.", "timestamp": 1116}, {"speaker": "Airrack", "en": "All right, I think most of them are away from the kitchen. I'm going to go get back in.", "ko": "좋아, 대부분 주방에서 떨어져 있는 것 같아. 다시 들어가야겠다.", "timestamp": 1121}], "expressions": [{"expr": "secret shopping spree", "category": "natural_phrase", "formality": "casual", "workplace_safe": true, "tag": "몰래 하는 쇼핑, 충동구매 느낌의 표현", "quote_en": "But as I was in the middle of my secret shopping spree, one of the contestants noticed me.", "quote_speaker": "화자", "context": "'shopping spree'는 원래 신나게 많이 사들이는 쇼핑을 뜻하는 캐주얼한 표현인데, 여기선 몰래 음식을 챙기는 상황에 유머러스하게 적용했다. 'secret'을 붙여서 들키면 안 되는 긴장감 있는 상황을 코믹하게 표현한 것. 일상 대화에서도 '몰래 지른 쇼핑'을 이렇게 표현할 수 있다.", "listening_tip": "'spree'는 /spriː/로 발음되며 강세가 뒤에 오는 단어라 빠르게 지나가듯 들린다.", "examples": [{"en": "I went on a secret shopping spree at the mall during lunch.", "ko": "점심시간에 몰래 쇼핑몰에서 지르고 왔어."}, {"en": "Her secret shopping spree left her wallet empty.", "ko": "그녀의 몰래 쇼핑 때문에 지갑이 텅 비었다."}], "timestamp": 1078}, {"expr": "slip up", "category": "phrasal_verb", "formality": "casual", "workplace_safe": true, "tag": "실수하다, 말실수하다", "quote_en": "B, introduce myself and hope I didn't slip up.", "quote_speaker": "Airrack", "context": "'slip up'은 작은 실수를 저지른다는 뜻의 구동사로, 특히 말이나 행동에서 깜빡하고 실수하는 상황에 자주 쓰인다. 여기서는 가짜 신분을 연기하다가 들통날 만한 말실수를 할까봐 걱정하는 맥락이다. 일상 대화와 업무 상황 모두에서 무난하게 쓸 수 있는 표현이다.", "listening_tip": "'slip up'은 두 단어가 붙어서 '슬리럽'처럼 연음되어 들린다.", "examples": [{"en": "I slipped up and called my boss by the wrong name.", "ko": "실수로 상사 이름을 잘못 불렀어."}, {"en": "Don't worry, everyone slips up sometimes.", "ko": "걱정 마, 누구나 가끔 실수해."}], "timestamp": 1085}, {"expr": "bought that", "category": "idiom", "formality": "casual", "workplace_safe": true, "tag": "믿다, 속아넘어가다 (구어적)", "quote_en": "I didn't know if this guy bought that or not, but I was not going to stick around and find out.", "quote_speaker": "Airrack", "context": "'buy'는 물건을 산다는 뜻 외에 구어체에서 '믿다, 속다'라는 뜻으로도 쓰인다. 여기서는 Airrack이 가짜 이름과 신분을 댔을 때 상대방이 그걸 믿었는지 의심하는 상황이다. 거짓말이나 변명을 상대가 믿었는지 물을 때 매우 자연스럽게 쓰이는 표현이다.", "listening_tip": "'bought'는 /bɔːt/로 짧게 발음되며 과거형이라는 점에 유의해야 한다.", "examples": [{"en": "I told him I was sick, but I don't think he bought it.", "ko": "아프다고 했는데 그가 믿은 것 같지 않아."}, {"en": "She bought my excuse completely.", "ko": "그녀는 내 변명을 완전히 믿었어."}], "timestamp": 1110}, {"expr": "stick around", "category": "phrasal_verb", "formality": "casual", "workplace_safe": true, "tag": "그 자리에 머물다, 남아있다", "quote_en": "I was not going to stick around and find out.", "quote_speaker": "Airrack", "context": "'stick around'는 어떤 장소에 계속 남아있다는 뜻의 매우 흔한 구동사이다. 여기서는 위험한 상황에서 더 알아보려고 머물지 않겠다는 의미로 쓰였다. 친구들 사이에서 '좀 더 있다 가' 같은 말을 할 때도 자주 쓰인다.", "listening_tip": "'stick around'는 빠르게 말할 때 '스티커라운드'처럼 연음된다.", "examples": [{"en": "Can you stick around after the meeting?", "ko": "회의 끝나고 좀 남아있을 수 있어?"}, {"en": "I don't want to stick around for the boring part.", "ko": "지루한 부분까지 남아있고 싶지 않아."}], "timestamp": 1114}, {"expr": "B-roll", "category": "cultural_expression", "formality": "neutral", "workplace_safe": true, "tag": "영상 제작 용어, 보조 영상 자료", "quote_en": "Yeah, I'm just getting some B-roll.", "quote_speaker": "Airrack", "context": "'B-roll'은 영상 제작 업계 용어로, 메인 장면이 아닌 보조적으로 삽입되는 배경 영상이나 추가 촬영분을 가리킨다. 유튜버나 방송 관련 영상에서 매우 흔하게 등장하는 표현이며, 여기서는 Airrack이 카메라맨인 척하기 위한 그럴듯한 변명으로 사용했다. 미디어 업계에서 일하거나 유튜브 콘텐츠를 자주 보는 사람이라면 꼭 알아야 할 용어다.", "listening_tip": "'B-roll'은 'B'를 강하게 발음하고 'roll'은 짧게 흘려 말한다.", "examples": [{"en": "We need more B-roll footage for the intro.", "ko": "인트로용 B-roll 영상이 더 필요해."}, {"en": "The documentary used a lot of B-roll of the city streets.", "ko": "그 다큐멘터리는 도시 거리의 B-roll 영상을 많이 사용했다."}], "timestamp": 1106}, {"expr": "way too close", "category": "natural_phrase", "formality": "casual", "workplace_safe": true, "tag": "아슬아슬했다, 하마터면 (위기 상황 표현)", "quote_en": "Oh my gosh, that was way too close.", "quote_speaker": "Airrack", "context": "위험한 상황에서 간신히 빠져나왔을 때 쓰는 매우 자연스러운 구어 표현이다. 'close call'과 비슷한 뉘앙스로, 하마터면 들킬 뻔했거나 큰일 날 뻔한 상황을 묘사할 때 사용한다. 일상 대화에서 매우 자주 들을 수 있는 표현이다.", "listening_tip": "'way too'는 강조를 위해 길게 늘여서 발음되는 경우가 많다.", "examples": [{"en": "That car almost hit me, it was way too close.", "ko": "그 차가 나를 거의 칠 뻔했어, 진짜 아슬아슬했어."}, {"en": "We finished the project right before the deadline, way too close for comfort.", "ko": "마감 직전에 간신히 프로젝트를 끝냈어, 정말 아슬아슬했지."}], "timestamp": 1110}], "video_title": "I Hid In MrBeast's Grocery Store", "channel_name": "Airrack", "video_url": "https://www.youtube.com/watch?v=_LHh3BS9Xx4", "lesson_date": "2026-10-11", "video_id": "_LHh3BS9Xx4"}</script>
+<script>
+  // 보안 참고: 아래 데이터(data)는 유튜브 자막/LLM 생성 결과이며 신뢰할 수 없는 외부 콘텐츠다.
+  // 저장형 XSS를 막기 위해 el()로 만든 요소는 전부 textContent만 쓰고, innerHTML은
+  // 이 파일이 직접 작성한 고정 마크업(SVG 아이콘)에만 사용한다.
+  const data = JSON.parse(document.getElementById('expr-data').textContent);
+  const cardsEl = document.getElementById('cards');
+  const jumpEl = document.getElementById('jump-row');
+  let player;
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  document.getElementById('scene').textContent = data.scene_summary;
+
+  const sourceEl = document.getElementById('source-line');
+  if (data.video_title) {
+    sourceEl.textContent = `${data.video_title} · ${data.channel_name || ''} · `;
+    const link = el('a', '', '원본 영상 보기');
+    link.href = data.video_url || `https://www.youtube.com/watch?v=${data.video_id}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    sourceEl.appendChild(link);
+    sourceEl.appendChild(el('span', '', ' · 표현 해설/번역은 AI가 생성했습니다.'));
+  } else {
+    sourceEl.textContent = 'AI가 생성한 번역과 해설입니다.';
+  }
+
+  function fmtTs(sec) {
+    return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+  }
+
+  function seek(ts) {
+    if (player && player.seekTo) {
+      player.seekTo(ts, true);
+      player.playVideo();
+    }
+  }
+
+  const scriptEl = document.getElementById('script');
+  const scriptLines = [];
+  data.script.forEach((line) => {
+    const row = el('div', 'script-line');
+    row.setAttribute('role', 'button');
+    row.setAttribute('tabindex', '0');
+    row.setAttribute('aria-label', `${fmtTs(line.timestamp)}${' '}지점으로 이동`);
+    row.appendChild(el('div', 'speaker', line.speaker));
+    row.appendChild(el('div', 'script-en', line.en));
+    row.appendChild(el('div', 'script-ko', line.ko));
+    row.addEventListener('click', () => seek(line.timestamp));
+    row.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        seek(line.timestamp);
+      }
+    });
+    scriptEl.appendChild(row);
+    scriptLines.push({ ts: line.timestamp, el: row });
+  });
+
+  let loopEnabled = false;
+
+  // ponytail: naive 400ms poll, switch to rAF+state gating if this were a battery-sensitive app
+  let activeLine = null;
+  setInterval(() => {
+    if (!player || !player.getCurrentTime) return;
+    const t = player.getCurrentTime();
+
+    if (loopEnabled && t >= data.end_sec - 0.5) {
+      player.seekTo(data.start_sec, true);
+    }
+
+    let current = scriptLines[0];
+    for (const line of scriptLines) {
+      if (line.ts <= t) current = line; else break;
+    }
+    if (current && current.el !== activeLine) {
+      if (activeLine) {
+        activeLine.classList.remove('active');
+        activeLine.removeAttribute('aria-current');
+      }
+      current.el.classList.add('active');
+      current.el.setAttribute('aria-current', 'true');
+      activeLine = current.el;
+    }
+  }, 400);
+
+  // --- 재생 속도 / 구간 반복 ---
+  document.querySelectorAll('.speed-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (player && player.setPlaybackRate) player.setPlaybackRate(parseFloat(btn.dataset.rate));
+      document.querySelectorAll('.speed-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  const loopBtn = document.getElementById('loop-toggle');
+  loopBtn.addEventListener('click', () => {
+    loopEnabled = !loopEnabled;
+    loopBtn.setAttribute('aria-pressed', String(loopEnabled));
+    loopBtn.classList.toggle('active', loopEnabled);
+  });
+
+  // --- 자막 모드 (영어만 / 영어+한국어 / 숨기기), 마지막 선택을 기억한다 ---
+  const SUB_MODE_KEY = 'english-learning-sub-mode';
+  function applySubMode(mode) {
+    document.body.dataset.subMode = mode;
+    localStorage.setItem(SUB_MODE_KEY, mode);
+    document.querySelectorAll('.mode-btn').forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+  }
+  document.querySelectorAll('.mode-btn').forEach((btn) => {
+    btn.addEventListener('click', () => applySubMode(btn.dataset.mode));
+  });
+  applySubMode(localStorage.getItem(SUB_MODE_KEY) || 'both');
+
+  function chevronIcon() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'chevron');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('width', '16');
+    svg.setAttribute('height', '16');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M6 9l6 6 6-6');
+    svg.appendChild(path);
+    return svg;
+  }
+
+  data.expressions.forEach((e, i) => {
+    const chip = el('a', 'jump-chip display', e.expr);
+    chip.href = `#expr-${i}`;
+    chip.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const card = document.getElementById(`expr-${i}`);
+      card.open = true;
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      seek(e.timestamp);
+      card.querySelector('.expr').focus();
+    });
+    jumpEl.appendChild(chip);
+
+    const details = document.createElement('details');
+    details.className = 'card';
+    details.id = `expr-${i}`;
+    if (i === 0) details.open = true;
+
+    const summary = el('summary', 'card-top');
+    const main = el('div', 'card-top-main');
+    main.appendChild(chevronIcon());
+    const titleWrap = el('div');
+    const metaRow = el('div', 'expr-meta');
+    metaRow.appendChild(el('span', 'category-badge', e.category.replace(/_/g, ' ')));
+    if (!e.workplace_safe) {
+      metaRow.appendChild(el('span', 'workplace-warning', '직장 사용 주의'));
+    }
+    titleWrap.appendChild(metaRow);
+    const exprTitle = el('div', 'expr display', e.expr);
+    exprTitle.setAttribute('tabindex', '-1');  // 점프 후 포커스 이동 대상(탭 순서에는 없음)
+    titleWrap.appendChild(exprTitle);
+    titleWrap.appendChild(el('div', 'tag', e.tag));
+    main.appendChild(titleWrap);
+    summary.appendChild(main);
+
+    const tsBtn = el('button', 'ts', fmtTs(e.timestamp));
+    tsBtn.type = 'button';
+    tsBtn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      seek(e.timestamp);
+    });
+    summary.appendChild(tsBtn);
+    details.appendChild(summary);
+
+    const body = el('div', 'card-body');
+
+    const quoteBox = el('div', 'subbox subbox-quote');
+    quoteBox.appendChild(el('div', 'subbox-label', '드라마 속 문장'));
+    quoteBox.appendChild(el('div', 'quote', `"${e.quote_en}"`));
+    quoteBox.appendChild(el('div', 'quote-speaker', `— ${e.quote_speaker}`));
+    body.appendChild(quoteBox);
+
+    const contextBox = el('div', 'subbox subbox-context');
+    contextBox.appendChild(el('div', 'subbox-label', '문화 / 유머 포인트'));
+    contextBox.appendChild(el('div', 'context', e.context));
+    body.appendChild(contextBox);
+
+    const tipBox = el('div', 'subbox subbox-tip');
+    tipBox.appendChild(el('div', 'subbox-label', '리스닝 포인트'));
+    tipBox.appendChild(el('div', 'tip', e.listening_tip));
+    body.appendChild(tipBox);
+
+    const exampleBox = el('div', 'subbox subbox-example');
+    exampleBox.appendChild(el('div', 'subbox-label', '예문'));
+    e.examples.forEach((ex) => {
+      const exWrap = el('div', 'example');
+      exWrap.appendChild(el('div', 'en', ex.en));
+      exWrap.appendChild(el('div', 'ko', ex.ko));
+      exampleBox.appendChild(exWrap);
+    });
+    body.appendChild(exampleBox);
+
+    details.appendChild(body);
+    cardsEl.appendChild(details);
+  });
+
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.body.appendChild(tag);
+
+  window.onYouTubeIframeAPIReady = function() {
+    player = new YT.Player('player', {
+      videoId: data.video_id,
+      playerVars: { start: data.start_sec, end: data.end_sec, autoplay: 1, rel: 0 },
+      events: {
+        onReady: (ev) => ev.target.playVideo()
+      }
+    });
+  };
+
+  // --- 오늘의 복습 퀴즈 (기존 표현 데이터로 클라이언트에서 생성, 별도 LLM 호출 없음) ---
+  function shuffled(arr) {
+    return [...arr].sort(() => Math.random() - 0.5);
+  }
+
+  function saveQuizProgress(questions, results) {
+    const STORE_KEY = 'english-learning-progress';
+    const store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    const lessonId = data.lesson_date || data.video_id;
+    store[lessonId] = {
+      completed_at: new Date().toISOString(),
+      quiz_results: results,
+      // ponytail: 정답/오답 2단계 SRS. "애매함" 같은 중간 단계는 다음 단계에서.
+      review_due: questions.map((q) => ({ expr: q.expr, due_in_days: results[q.expr] ? 7 : 1 })),
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  }
+
+  function buildQuiz() {
+    const quizEl = document.getElementById('quiz');
+    const pool = data.expressions;
+    if (pool.length < 3) {
+      quizEl.textContent = '이 학습에는 퀴즈를 만들 표현이 부족해요.';
+      return;
+    }
+    const questions = shuffled(pool).slice(0, 3);
+    const results = {};
+
+    questions.forEach((correctExpr, qi) => {
+      const distractors = shuffled(pool.filter((p) => p.expr !== correctExpr.expr)).slice(0, 2);
+      const options = shuffled([correctExpr, ...distractors]);
+
+      const qBox = el('div', 'quiz-q');
+      qBox.appendChild(el('div', 'quiz-question', `Q${qi + 1}. "${correctExpr.expr}"의 뜻/뉘앙스로 가장 알맞은 것은?`));
+      const optsEl = el('div', 'quiz-options');
+
+      options.forEach((opt) => {
+        const btn = el('button', 'quiz-option', opt.tag);
+        btn.type = 'button';
+        btn.addEventListener('click', () => {
+          const isCorrect = opt.expr === correctExpr.expr;
+          Array.from(optsEl.children).forEach((b) => { b.disabled = true; });
+          btn.classList.add(isCorrect ? 'correct' : 'wrong');
+          if (!isCorrect) {
+            const correctBtn = Array.from(optsEl.children).find((b) => b.textContent === correctExpr.tag);
+            if (correctBtn) correctBtn.classList.add('correct');
+          }
+          results[correctExpr.expr] = isCorrect;
+          if (Object.keys(results).length === questions.length) {
+            const correctCount = Object.values(results).filter(Boolean).length;
+            const summary = el(
+              'div', 'quiz-result',
+              `오늘의 표현 ${data.expressions.length}개 · 퀴즈 ${questions.length}문제 중 ${correctCount}개 정답. ` +
+              (correctCount < questions.length ? '틀린 표현은 내일 다시 볼게요.' : '완벽해요! 7일 뒤에 복습해요.')
+            );
+            quizEl.appendChild(summary);
+            saveQuizProgress(questions, results);
+          }
+        });
+        optsEl.appendChild(btn);
+      });
+      qBox.appendChild(optsEl);
+      quizEl.appendChild(qBox);
+    });
+  }
+  buildQuiz();
+</script>
+</body>
+</html>

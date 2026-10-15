@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘의 학습 (Daily)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --violet: #7C5CFC; --amber: #F5A623; --teal: #2DD4C6; --green: #34D399;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px 80px;
+    background: #0f0f14; color: #f2f2f5;
+    font-family: -apple-system, "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+  }
+  .display { font-family: "Space Grotesk", -apple-system, "Apple SD Gothic Neo", sans-serif; }
+  .skip-link {
+    position: absolute; left: -999px; top: 0; background: var(--violet); color: #fff;
+    padding: 10px 16px; border-radius: 0 0 8px 0; z-index: 100; text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .sticky-col {
+    position: sticky; top: 0; z-index: 10;
+    background: #0f0f14; padding: 10px 0; margin: 0 0 -10px;
+  }
+  @media (max-width: 700px) {
+    .sticky-col { position: static; }
+  }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .sub { color: #9a9aa5; margin: 0 0 28px; font-size: 15px; }
+  .source-line { color: #9a9aa5; font-size: 13px; margin: 10px 0 0; line-height: 1.6; }
+  .source-line a { color: #9479fc; }
+  .date-nav { display: flex; gap: 8px; margin: 18px 0 28px; }
+  .date-nav-btn {
+    flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center;
+    text-align: center; font-size: 13px; color: #d7d7de; background: #1a1a22;
+    border: 1px solid #2b2b36; border-radius: 10px; text-decoration: none; padding: 0 10px;
+    transition: border-color .15s, color .15s;
+  }
+  .date-nav-btn:hover { border-color: var(--violet); color: #fff; }
+  .date-nav-btn.disabled { color: #4a4a55; pointer-events: none; }
+  .player-box {
+    position: relative; width: 100%; aspect-ratio: 16/9;
+    border-radius: 16px; overflow: hidden; background: #000;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+  }
+  #player { width: 100%; height: 100%; }
+  .hint { text-align: center; color: #8f8f9a; font-size: 13px; margin: 10px 0 32px; }
+  .badge { font-size: 12px; color: #9479fc; font-weight: 700;
+           letter-spacing: .04em; margin-bottom: 10px; }
+  .section-title { display: flex; align-items: center; gap: 8px; font-weight: 700;
+                    font-size: 18px; margin: 40px 0 14px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dot-violet { background: var(--violet); }
+  .dot-amber { background: var(--amber); }
+  .dot-teal { background: var(--teal); }
+  .dot-green { background: var(--green); }
+  .scene-box {
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px;
+    padding: 18px 22px; color: #d7d7de; font-size: 15px; line-height: 1.6;
+  }
+  .script-box {
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px;
+    padding: 6px 22px;
+  }
+  .script-line {
+    padding: 14px 12px; margin: 0 -12px; border-bottom: 1px solid #24242e;
+    border-radius: 8px; border-left: 3px solid transparent; cursor: pointer;
+    min-height: 44px;
+  }
+  .script-line:last-child { border-bottom: none; }
+  .script-line:hover { background: #ffffff08; }
+  .script-line.active { background: #7c5cfc1a; border-left-color: var(--violet); }
+  .speaker { font-size: 12px; font-weight: 700; color: var(--violet); letter-spacing: .04em; }
+  .script-en { font-size: 16px; color: #fff; margin: 4px 0 2px; }
+  .script-ko { font-size: 13px; color: #8f8f9a; }
+  body[data-sub-mode="en"] .script-ko { display: none; }
+  body[data-sub-mode="hidden"] .script-box { display: none; }
+
+  .player-controls {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    gap: 10px; margin: 14px 0 0;
+  }
+  .control-group, .subtitle-mode { display: flex; gap: 6px; flex-wrap: wrap; }
+  .subtitle-mode { margin: 0 0 14px; }
+  .speed-btn, .loop-btn, .mode-btn {
+    min-height: 36px; font-size: 12px; font-weight: 700; color: #d7d7de;
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 999px;
+    padding: 0 14px; cursor: pointer; font-family: inherit;
+  }
+  .speed-btn.active, .loop-btn.active, .mode-btn.active {
+    color: #fff; border-color: var(--violet); background: #7c5cfc26;
+  }
+
+  .jump-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .jump-chip {
+    font-size: 13px; color: #d7d7de; background: #1a1a22; border: 1px solid #2b2b36;
+    border-radius: 999px; padding: 6px 14px; text-decoration: none; white-space: nowrap;
+    transition: border-color .15s, color .15s;
+  }
+  .jump-chip:hover { border-color: var(--violet); color: #fff; }
+
+  .card {
+    display: block; background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px;
+    padding: 0; margin-bottom: 14px; transition: border-color .15s;
+    scroll-margin-top: 76px;
+  }
+  .card:hover { border-color: var(--violet); }
+  .card-top {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 20px 22px; cursor: pointer; list-style: none;
+  }
+  .card-top::-webkit-details-marker { display: none; }
+  .card-top-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .chevron { color: #6f6f7a; transition: transform .2s; flex-shrink: 0; }
+  details[open] > .card-top .chevron { transform: rotate(180deg); }
+  .expr-meta { display: flex; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
+  .category-badge, .workplace-warning {
+    font-size: 10px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px;
+  }
+  .category-badge { color: #9479fc; background: #7c5cfc1a; }
+  .workplace-warning { color: var(--amber); background: #f5a62326; }
+  .expr { font-size: 22px; font-weight: 700; color: #fff; }
+  .expr:focus { outline: 2px solid var(--violet); outline-offset: 4px; }
+  .tag { font-size: 14px; color: #9a9aa5; margin-top: 4px; }
+  .ts {
+    font-size: 12px; font-weight: 700; color: var(--violet); background: #7c5cfc1a;
+    padding: 5px 11px; border-radius: 999px; white-space: nowrap; border: none;
+    cursor: pointer; font-family: inherit;
+  }
+  .ts:hover { background: #7c5cfc33; }
+  .card-body { padding: 0 22px 22px; }
+  .subbox {
+    background: #14141a; border-radius: 10px; padding: 12px 16px; margin-top: 14px;
+    border-left: 3px solid transparent;
+  }
+  .subbox-quote { border-left-color: var(--violet); }
+  .subbox-context { border-left-color: var(--amber); }
+  .subbox-tip { border-left-color: var(--teal); }
+  .subbox-example { border-left-color: var(--green); }
+  .subbox-label { font-size: 11px; font-weight: 700; letter-spacing: .04em;
+                   text-transform: uppercase; margin-bottom: 6px; }
+  .subbox-quote .subbox-label { color: var(--violet); }
+  .subbox-context .subbox-label { color: var(--amber); }
+  .subbox-tip .subbox-label { color: var(--teal); }
+  .subbox-example .subbox-label { color: var(--green); }
+  .quote { font-style: italic; color: #fff; font-size: 15px; }
+  .quote-speaker { color: #8f8f9a; font-size: 12px; margin-top: 4px; }
+  .context, .tip { color: #c3c3cc; font-size: 14px; line-height: 1.6; }
+  .example { margin-top: 8px; }
+  .example .en { color: #fff; font-size: 14px; }
+  .example .ko { color: #8f8f9a; font-size: 13px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  .quiz-box {
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px; padding: 20px 22px;
+  }
+  .quiz-q { margin-bottom: 22px; }
+  .quiz-q:last-child { margin-bottom: 0; }
+  .quiz-question { font-size: 15px; color: #f2f2f5; margin-bottom: 12px; line-height: 1.5; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-option {
+    min-height: 44px; text-align: left; font-size: 14px; color: #d7d7de;
+    background: #14141a; border: 1px solid #2b2b36; border-radius: 10px;
+    padding: 10px 14px; cursor: pointer; font-family: inherit;
+  }
+  .quiz-option:hover { border-color: var(--violet); }
+  .quiz-option.correct { border-color: var(--green); background: #34d39926; }
+  .quiz-option.wrong { border-color: #e5484d; background: #e5484d26; }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-result {
+    background: #1a1a22; border: 1px solid #2b2b36; border-radius: 14px;
+    padding: 18px 22px; margin-top: 14px; color: #d7d7de; font-size: 14px; line-height: 1.7;
+  }
+
+  a:focus-visible, button:focus-visible, summary:focus-visible, [role="button"]:focus-visible {
+    outline: 2px solid var(--violet); outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">본문 바로가기</a>
+<div class="wrap">
+  <header>
+    <div class="badge display">TODAY'S LEARNING · DAILY</div>
+    <h1 class="display">오늘의 Gen Z 표현</h1>
+    <p class="sub">30:47 ~ 31:50 구간에서 뽑은 표현 8개</p>
+    <nav class="date-nav" aria-label="날짜 이동"><a class="date-nav-btn" href="2026-10-11.html">← 이전 학습</a><a class="date-nav-btn" href="../index.html">전체 학습</a><span class="date-nav-btn disabled" aria-disabled="true">다음 학습 →</span></nav>
+  </header>
+
+  <main id="main">
+    <div class="sticky-col">
+      <div class="player-box"><div id="player"></div></div>
+    </div>
+    <p class="source-line" id="source-line"></p>
+    <div class="player-controls">
+      <div class="control-group" role="group" aria-label="재생 속도" id="speed-group">
+        <button type="button" class="speed-btn" data-rate="0.75">0.75x</button>
+        <button type="button" class="speed-btn active" data-rate="1">1x</button>
+        <button type="button" class="speed-btn" data-rate="1.25">1.25x</button>
+      </div>
+      <button type="button" class="loop-btn" id="loop-toggle" aria-pressed="false">구간 반복</button>
+    </div>
+    <p class="hint">타임스탬프를 클릭하면 그 표현이 나오는 순간으로 이동합니다. 자동재생이 차단되면 영상을 한 번 클릭해주세요.</p>
+
+    <h2 class="section-title"><span class="dot dot-violet" aria-hidden="true"></span>오늘의 장면</h2>
+    <div class="scene-box" id="scene"></div>
+
+    <h2 class="section-title"><span class="dot dot-teal" aria-hidden="true"></span>스크립트</h2>
+    <div class="subtitle-mode" role="group" aria-label="자막 모드" id="subtitle-mode">
+      <button type="button" class="mode-btn" data-mode="en">영어만</button>
+      <button type="button" class="mode-btn active" data-mode="both">영어+한국어</button>
+      <button type="button" class="mode-btn" data-mode="hidden">자막 숨기기</button>
+    </div>
+    <div class="script-box" id="script"></div>
+
+    <h2 class="section-title"><span class="dot dot-green" aria-hidden="true"></span>오늘의 표현</h2>
+    <nav class="jump-row" id="jump-row" aria-label="표현 바로가기"></nav>
+    <div id="cards"></div>
+
+    <h2 class="section-title"><span class="dot dot-amber" aria-hidden="true"></span>오늘의 복습 퀴즈</h2>
+    <div class="quiz-box" id="quiz"></div>
+
+  </main>
+
+  
+</div>
+
+<script id="expr-data" type="application/json">{"scene_summary": "스피드가 FIFA 게임 중 집중력을 잃고 자책하며 혼잣말로 스스로를 다그친다. 상대 축구선수가 게임도 잘하는 것에 놀라며 '언제 연습할 시간이 있냐'고 투덜댄다. 감정이 격해진 채로 혼잣말과 자기최면 같은 말을 반복한다.", "start_sec": 1847, "end_sec": 1910, "script": [{"speaker": "스피드", "en": "God damn it. Damn it. DON'T DO THAT AGAIN. SPEED, STOP THINKING ABOUT LIKE YOUR STUPID ASS. LOCK IN. DO NOT DO THIS AGAIN. TIME AFTER TIME YOU THINK. BUT STOP THINKING THAT WAY. JUST LOCK IN, BRO. That's all I got to do. Thinking takes either.", "ko": "젠장. 젠장. 다시는 그러지 마. 스피드, 그 멍청한 생각 좀 그만해. 집중해. 다시는 이러지 마. 매번 생각만 해. 근데 그렇게 생각하지 마. 그냥 집중하라고, 형. 그게 내가 할 일의 전부야. 생각이 너무 많아.", "timestamp": 1847}, {"speaker": "스피드", "en": "Stop thinking. Stop thinking. Just come on. I got him, bro. He's not good at the game. Just lock in and do what you DO BEST.", "ko": "생각하지 마. 생각하지 마. 그냥 가자. 쟤는 내가 이길 수 있어, 형. 게임 잘 못해. 그냥 집중하고 네가 제일 잘하는 걸 해.", "timestamp": 1863}, {"speaker": "스피드", "en": "STOP THINKING ABOUT STUPID STOP THINKING ABOUT TECH. JUST LOCK IN, BRO. KEEP THINKING ABOUT STUPID STUFF.", "ko": "멍청한 생각 그만해, 기술 생각도 그만해. 그냥 집중하라고, 형. 계속 쓸데없는 생각만 하고 있잖아.", "timestamp": 1871}, {"speaker": "스피드", "en": "My god, bro. Why all these footballers good at the game, BRO? WHEN DO Y'ALL HAVE TIME TO PLAY THE GAME? Y'ALL TRAIN 24/7. WHAT THE BRO? Y'ALL TRAIN 24/7.", "ko": "세상에, 형. 왜 이 축구선수들은 다 게임도 잘하는 거야? 너네는 언제 게임할 시간이 있어? 24시간 훈련만 하잖아. 도대체 뭐야, 형? 24시간 훈련하면서.", "timestamp": 1885}, {"speaker": "스피드", "en": "OH, WHAT THE LIKE WHEN WHERE ARE YOU LIKE, BRO? WHEN DO YOU HAVE TIME TO PLAY THE GAME,", "ko": "아 진짜 뭐야, 도대체 언제, 형? 언제 게임할 시간이 있는 거야,", "timestamp": 1898}, {"speaker": "스피드", "en": "BRO? If I score this all Tik Tok with my videos.", "ko": "형? 이거 득점하면 내 영상으로 틱톡 도배할 거야.", "timestamp": 1905}], "expressions": [{"expr": "lock in", "category": "slang", "formality": "casual", "workplace_safe": true, "tag": "집중하다, 몰입하다 (캐주얼한 구어체)", "quote_en": "JUST LOCK IN, BRO.", "quote_speaker": "스피드", "context": "'lock in'은 Gen Z와 게이머들 사이에서 '완전히 집중하다'는 뜻으로 매우 흔하게 쓰이는 표현입니다. 원래는 자물쇠를 잠근다는 뜻이지만 비유적으로 '마음을 다잡고 집중 모드로 들어간다'는 의미로 확장되었습니다. 특히 게임, 스포츠, 공부 등 성과를 내야 하는 상황에서 스스로를 다그칠 때 자주 쓰입니다. 이 영상에서는 스피드가 실수를 반복하자 스스로에게 반복적으로 외치는 표현으로 등장합니다.", "listening_tip": "'lock in'은 빠르게 발음되면 거의 '라킨'처럼 들리며, 강세는 'lock'에 강하게 들어갑니다.", "examples": [{"en": "I need to lock in before the exam.", "ko": "시험 전에 집중 모드로 들어가야 해."}, {"en": "Everyone lock in, we're almost done with the project.", "ko": "다들 집중하자, 프로젝트 거의 다 끝났어."}], "timestamp": 1847}, {"expr": "stop thinking about stupid stuff", "category": "casual_phrase", "formality": "casual", "workplace_safe": false, "tag": "쓸데없는 생각 그만해 (직설적이고 캐주얼한 자기비판)", "quote_en": "KEEP THINKING ABOUT STUPID STUFF.", "quote_speaker": "스피드", "context": "자기 자신에게 화를 내며 '쓸데없는 생각 좀 그만하라'고 다그치는 표현입니다. 'stupid'라는 단어가 들어가 다소 거칠게 들릴 수 있지만, 친한 친구나 자기 자신에게 쓸 때는 매우 자연스러운 캐주얼 표현입니다. 직장이나 공식적인 자리에서는 부적절할 수 있습니다. 스트리머들이 게임 중 감정적으로 흥분했을 때 자주 쓰는 패턴입니다.", "listening_tip": "'stupid stuff'는 빠르게 이어져 '스튜핃스터프'처럼 들리며 감정이 격할 때는 음절이 뭉개집니다.", "examples": [{"en": "Stop thinking about stupid stuff and focus on your work.", "ko": "쓸데없는 생각 그만하고 일에 집중해."}, {"en": "I keep thinking about stupid stuff instead of studying.", "ko": "공부는 안 하고 자꾸 쓸데없는 생각만 하게 돼."}], "timestamp": 1871}, {"expr": "your stupid ass", "category": "humor_sarcasm", "formality": "rude", "workplace_safe": false, "tag": "너의 멍청한 모습 (무례하거나 거친 자기비하/욕설성 표현)", "quote_en": "STOP THINKING ABOUT LIKE YOUR STUPID ASS.", "quote_speaker": "스피드", "context": "'stupid ass'는 'ass'가 들어간 비속어적 강조 표현으로, 상대방이나 자신을 비하할 때 씁니다. 여기서는 자기 자신에게 화가 나서 쓴 자기비하 표현입니다. 친구 사이의 농담이나 스트리밍 콘텐츠에서는 흔히 쓰이지만 공식적인 자리나 직장에서는 절대 사용해서는 안 되는 무례한 표현임을 학습자는 알아야 합니다.", "listening_tip": "'stupid ass'는 감정이 격할 때 '스튜피더스'처럼 거의 붙어서 발음됩니다.", "examples": [{"en": "Stop acting like your stupid ass doesn't know.", "ko": "모르는 척 좀 그만해, 멍청아."}, {"en": "I can't believe my stupid ass forgot the keys again.", "ko": "또 열쇠를 깜빡하다니 내가 진짜 멍청하다."}], "timestamp": 1847}, {"expr": "I got him", "category": "natural_phrase", "formality": "casual", "workplace_safe": true, "tag": "내가 이길 수 있어, 내가 쟤보다 낫다 (자신감 표현)", "quote_en": "I got him, bro. He's not good at the game.", "quote_speaker": "스피드", "context": "'I got him'은 스포츠나 게임, 경쟁 상황에서 '내가 저 사람을 이길 수 있다' 또는 '내가 상황을 제어하고 있다'는 자신감을 나타낼 때 쓰는 매우 자연스러운 표현입니다. 문자 그대로 '그를 잡았다'는 뜻이 아니라 비유적으로 '상대를 파악했다, 이길 수 있다'는 의미로 쓰입니다. 일상 대화에서도 '내가 처리할게', '내가 담당할게'라는 뜻으로 확장되어 쓰이기도 합니다.", "listening_tip": "'got him'은 연음되어 '가림' 또는 '가름'처럼 들립니다. 'got'의 t가 거의 발음되지 않습니다.", "examples": [{"en": "Don't worry about the presentation, I got him covered.", "ko": "발표 걱정 마, 내가 처리할게."}, {"en": "I got him this time, he won't score again.", "ko": "이번엔 내가 쟤 막을 수 있어, 다시는 못 넣을 거야."}], "timestamp": 1863}, {"expr": "do what you do best", "category": "natural_phrase", "formality": "neutral", "workplace_safe": true, "tag": "네가 제일 잘하는 걸 해 (격려 표현)", "quote_en": "Just lock in and do what you DO BEST.", "quote_speaker": "스피드", "context": "자기 자신을 격려하거나 타인을 응원할 때 쓰는 자연스러운 표현입니다. 직장, 스포츠, 일상 어디서든 쓸 수 있는 무난한 격려의 말로, 복잡한 상황에서 '네 본래 실력을 발휘해'라는 뉘앙스를 담고 있습니다.", "listening_tip": "'do what you do best'에서 두 번째 'do'가 강조되며 약간 느리게 발음됩니다.", "examples": [{"en": "Just relax and do what you do best.", "ko": "그냥 긴장 풀고 네가 제일 잘하는 걸 해."}, {"en": "In the final game, she did what she does best and scored twice.", "ko": "결승전에서 그녀는 자신의 특기를 발휘해서 두 골을 넣었다."}], "timestamp": 1863}, {"expr": "what the hell", "category": "discourse_marker", "formality": "rude", "workplace_safe": false, "tag": "도대체 뭐야 (놀람/짜증을 나타내는 가벼운 욕설성 감탄사)", "quote_en": "WHAT THE BRO? Y'ALL TRAIN 24/7.", "quote_speaker": "스피드", "context": "'what the hell'은 놀람, 짜증, 당혹감을 표현할 때 쓰는 매우 흔한 감탄사입니다. 여기서는 'hell'이 생략된 채 'what the'만 말하고 끊는 패턴으로, 실제 구어에서 욕설을 흐리게 발음하거나 생략하는 경우가 많습니다. 친구 사이에서는 자연스럽지만 공식적인 자리에서는 피하는 것이 좋습니다.", "listening_tip": "실제 발화에서는 'hell' 부분이 삐- 소리로 가려지거나 아예 생략되어 'what the' 뒤에 침묵이나 다른 말이 바로 이어집니다.", "examples": [{"en": "What the hell is going on here?", "ko": "도대체 여기서 무슨 일이야?"}, {"en": "What the heck, why is the door locked?", "ko": "뭐야, 왜 문이 잠겨있어?"}], "timestamp": 1885}, {"expr": "y'all train 24/7", "category": "casual_phrase", "formality": "casual", "workplace_safe": true, "tag": "너네 24시간 훈련만 하잖아 (과장된 캐주얼 표현)", "quote_en": "Y'ALL TRAIN 24/7. WHAT THE BRO? Y'ALL TRAIN 24/7.", "quote_speaker": "스피드", "context": "'24/7'은 '24시간 7일 내내'라는 뜻으로 '항상, 쉬지 않고'를 강조할 때 쓰는 매우 흔한 구어체 표현입니다. 여기서는 프로 축구선수들이 게임까지 잘하는 것에 놀라며 과장되게 불평하는 유머러스한 맥락에서 쓰였습니다. 'y'all'은 'you all'의 남부/캐주얼 축약형으로 미국 구어에서 매우 흔합니다.", "listening_tip": "'24/7'은 '트웬티포어 세븐'으로 발음되며, 'y'all'은 '욜'처럼 짧게 발음됩니다.", "examples": [{"en": "I've been working 24/7 to finish this project.", "ko": "이 프로젝트 끝내려고 24시간 내내 일했어."}, {"en": "Y'all need to chill, you've been grinding 24/7.", "ko": "너네 좀 쉬어야 해, 맨날 쉬지 않고 갈아넣고 있잖아."}], "timestamp": 1885}, {"expr": "when do you have time to", "category": "natural_phrase", "formality": "neutral", "workplace_safe": true, "tag": "언제 ~할 시간이 있어? (놀람을 담은 자연스러운 질문)", "quote_en": "WHEN DO YOU HAVE TIME TO PLAY THE GAME,", "quote_speaker": "스피드", "context": "상대방이 여러 가지를 동시에 잘 해내는 것에 놀라며 '대체 언제 그걸 다 할 시간이 있냐'는 뉘앙스로 쓰는 자연스러운 구문입니다. 감탄과 약간의 부러움이 섞인 표현으로 일상 대화에서 흔히 사용됩니다.", "listening_tip": "'do you have'는 빠르게 연음되어 '두유해브' 또는 '주해브'처럼 들립니다.", "examples": [{"en": "When do you have time to read so many books?", "ko": "너는 도대체 언제 그렇게 많은 책을 읽을 시간이 있어?"}, {"en": "When do you have time to cook every single day?", "ko": "매일 요리할 시간이 대체 언제 있는 거야?"}], "timestamp": 1898}], "video_title": "Sunday Stream ⭐️ + Speed Vs.  Kvaratskhelia ⚽️🇬🇪", "channel_name": "IShowSpeed", "video_url": "https://www.youtube.com/watch?v=MBod0tK46Js", "lesson_date": "2026-10-15", "video_id": "MBod0tK46Js"}</script>
+<script>
+  // 보안 참고: 아래 데이터(data)는 유튜브 자막/LLM 생성 결과이며 신뢰할 수 없는 외부 콘텐츠다.
+  // 저장형 XSS를 막기 위해 el()로 만든 요소는 전부 textContent만 쓰고, innerHTML은
+  // 이 파일이 직접 작성한 고정 마크업(SVG 아이콘)에만 사용한다.
+  const data = JSON.parse(document.getElementById('expr-data').textContent);
+  const cardsEl = document.getElementById('cards');
+  const jumpEl = document.getElementById('jump-row');
+  let player;
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  document.getElementById('scene').textContent = data.scene_summary;
+
+  const sourceEl = document.getElementById('source-line');
+  if (data.video_title) {
+    sourceEl.textContent = `${data.video_title} · ${data.channel_name || ''} · `;
+    const link = el('a', '', '원본 영상 보기');
+    link.href = data.video_url || `https://www.youtube.com/watch?v=${data.video_id}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    sourceEl.appendChild(link);
+    sourceEl.appendChild(el('span', '', ' · 표현 해설/번역은 AI가 생성했습니다.'));
+  } else {
+    sourceEl.textContent = 'AI가 생성한 번역과 해설입니다.';
+  }
+
+  function fmtTs(sec) {
+    return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+  }
+
+  function seek(ts) {
+    if (player && player.seekTo) {
+      player.seekTo(ts, true);
+      player.playVideo();
+    }
+  }
+
+  const scriptEl = document.getElementById('script');
+  const scriptLines = [];
+  data.script.forEach((line) => {
+    const row = el('div', 'script-line');
+    row.setAttribute('role', 'button');
+    row.setAttribute('tabindex', '0');
+    row.setAttribute('aria-label', `${fmtTs(line.timestamp)}${' '}지점으로 이동`);
+    row.appendChild(el('div', 'speaker', line.speaker));
+    row.appendChild(el('div', 'script-en', line.en));
+    row.appendChild(el('div', 'script-ko', line.ko));
+    row.addEventListener('click', () => seek(line.timestamp));
+    row.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        seek(line.timestamp);
+      }
+    });
+    scriptEl.appendChild(row);
+    scriptLines.push({ ts: line.timestamp, el: row });
+  });
+
+  let loopEnabled = false;
+
+  // ponytail: naive 400ms poll, switch to rAF+state gating if this were a battery-sensitive app
+  let activeLine = null;
+  setInterval(() => {
+    if (!player || !player.getCurrentTime) return;
+    const t = player.getCurrentTime();
+
+    if (loopEnabled && t >= data.end_sec - 0.5) {
+      player.seekTo(data.start_sec, true);
+    }
+
+    let current = scriptLines[0];
+    for (const line of scriptLines) {
+      if (line.ts <= t) current = line; else break;
+    }
+    if (current && current.el !== activeLine) {
+      if (activeLine) {
+        activeLine.classList.remove('active');
+        activeLine.removeAttribute('aria-current');
+      }
+      current.el.classList.add('active');
+      current.el.setAttribute('aria-current', 'true');
+      activeLine = current.el;
+    }
+  }, 400);
+
+  // --- 재생 속도 / 구간 반복 ---
+  document.querySelectorAll('.speed-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (player && player.setPlaybackRate) player.setPlaybackRate(parseFloat(btn.dataset.rate));
+      document.querySelectorAll('.speed-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  const loopBtn = document.getElementById('loop-toggle');
+  loopBtn.addEventListener('click', () => {
+    loopEnabled = !loopEnabled;
+    loopBtn.setAttribute('aria-pressed', String(loopEnabled));
+    loopBtn.classList.toggle('active', loopEnabled);
+  });
+
+  // --- 자막 모드 (영어만 / 영어+한국어 / 숨기기), 마지막 선택을 기억한다 ---
+  const SUB_MODE_KEY = 'english-learning-sub-mode';
+  function applySubMode(mode) {
+    document.body.dataset.subMode = mode;
+    localStorage.setItem(SUB_MODE_KEY, mode);
+    document.querySelectorAll('.mode-btn').forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+  }
+  document.querySelectorAll('.mode-btn').forEach((btn) => {
+    btn.addEventListener('click', () => applySubMode(btn.dataset.mode));
+  });
+  applySubMode(localStorage.getItem(SUB_MODE_KEY) || 'both');
+
+  function chevronIcon() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'chevron');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('width', '16');
+    svg.setAttribute('height', '16');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M6 9l6 6 6-6');
+    svg.appendChild(path);
+    return svg;
+  }
+
+  data.expressions.forEach((e, i) => {
+    const chip = el('a', 'jump-chip display', e.expr);
+    chip.href = `#expr-${i}`;
+    chip.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const card = document.getElementById(`expr-${i}`);
+      card.open = true;
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      seek(e.timestamp);
+      card.querySelector('.expr').focus();
+    });
+    jumpEl.appendChild(chip);
+
+    const details = document.createElement('details');
+    details.className = 'card';
+    details.id = `expr-${i}`;
+    if (i === 0) details.open = true;
+
+    const summary = el('summary', 'card-top');
+    const main = el('div', 'card-top-main');
+    main.appendChild(chevronIcon());
+    const titleWrap = el('div');
+    const metaRow = el('div', 'expr-meta');
+    metaRow.appendChild(el('span', 'category-badge', e.category.replace(/_/g, ' ')));
+    if (!e.workplace_safe) {
+      metaRow.appendChild(el('span', 'workplace-warning', '직장 사용 주의'));
+    }
+    titleWrap.appendChild(metaRow);
+    const exprTitle = el('div', 'expr display', e.expr);
+    exprTitle.setAttribute('tabindex', '-1');  // 점프 후 포커스 이동 대상(탭 순서에는 없음)
+    titleWrap.appendChild(exprTitle);
+    titleWrap.appendChild(el('div', 'tag', e.tag));
+    main.appendChild(titleWrap);
+    summary.appendChild(main);
+
+    const tsBtn = el('button', 'ts', fmtTs(e.timestamp));
+    tsBtn.type = 'button';
+    tsBtn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      seek(e.timestamp);
+    });
+    summary.appendChild(tsBtn);
+    details.appendChild(summary);
+
+    const body = el('div', 'card-body');
+
+    const quoteBox = el('div', 'subbox subbox-quote');
+    quoteBox.appendChild(el('div', 'subbox-label', '드라마 속 문장'));
+    quoteBox.appendChild(el('div', 'quote', `"${e.quote_en}"`));
+    quoteBox.appendChild(el('div', 'quote-speaker', `— ${e.quote_speaker}`));
+    body.appendChild(quoteBox);
+
+    const contextBox = el('div', 'subbox subbox-context');
+    contextBox.appendChild(el('div', 'subbox-label', '문화 / 유머 포인트'));
+    contextBox.appendChild(el('div', 'context', e.context));
+    body.appendChild(contextBox);
+
+    const tipBox = el('div', 'subbox subbox-tip');
+    tipBox.appendChild(el('div', 'subbox-label', '리스닝 포인트'));
+    tipBox.appendChild(el('div', 'tip', e.listening_tip));
+    body.appendChild(tipBox);
+
+    const exampleBox = el('div', 'subbox subbox-example');
+    exampleBox.appendChild(el('div', 'subbox-label', '예문'));
+    e.examples.forEach((ex) => {
+      const exWrap = el('div', 'example');
+      exWrap.appendChild(el('div', 'en', ex.en));
+      exWrap.appendChild(el('div', 'ko', ex.ko));
+      exampleBox.appendChild(exWrap);
+    });
+    body.appendChild(exampleBox);
+
+    details.appendChild(body);
+    cardsEl.appendChild(details);
+  });
+
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.body.appendChild(tag);
+
+  window.onYouTubeIframeAPIReady = function() {
+    player = new YT.Player('player', {
+      videoId: data.video_id,
+      playerVars: { start: data.start_sec, end: data.end_sec, autoplay: 1, rel: 0 },
+      events: {
+        onReady: (ev) => ev.target.playVideo()
+      }
+    });
+  };
+
+  // --- 오늘의 복습 퀴즈 (기존 표현 데이터로 클라이언트에서 생성, 별도 LLM 호출 없음) ---
+  function shuffled(arr) {
+    return [...arr].sort(() => Math.random() - 0.5);
+  }
+
+  function saveQuizProgress(questions, results) {
+    const STORE_KEY = 'english-learning-progress';
+    const store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    const lessonId = data.lesson_date || data.video_id;
+    store[lessonId] = {
+      completed_at: new Date().toISOString(),
+      quiz_results: results,
+      // ponytail: 정답/오답 2단계 SRS. "애매함" 같은 중간 단계는 다음 단계에서.
+      review_due: questions.map((q) => ({ expr: q.expr, due_in_days: results[q.expr] ? 7 : 1 })),
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  }
+
+  function buildQuiz() {
+    const quizEl = document.getElementById('quiz');
+    const pool = data.expressions;
+    if (pool.length < 3) {
+      quizEl.textContent = '이 학습에는 퀴즈를 만들 표현이 부족해요.';
+      return;
+    }
+    const questions = shuffled(pool).slice(0, 3);
+    const results = {};
+
+    questions.forEach((correctExpr, qi) => {
+      const distractors = shuffled(pool.filter((p) => p.expr !== correctExpr.expr)).slice(0, 2);
+      const options = shuffled([correctExpr, ...distractors]);
+
+      const qBox = el('div', 'quiz-q');
+      qBox.appendChild(el('div', 'quiz-question', `Q${qi + 1}. "${correctExpr.expr}"의 뜻/뉘앙스로 가장 알맞은 것은?`));
+      const optsEl = el('div', 'quiz-options');
+
+      options.forEach((opt) => {
+        const btn = el('button', 'quiz-option', opt.tag);
+        btn.type = 'button';
+        btn.addEventListener('click', () => {
+          const isCorrect = opt.expr === correctExpr.expr;
+          Array.from(optsEl.children).forEach((b) => { b.disabled = true; });
+          btn.classList.add(isCorrect ? 'correct' : 'wrong');
+          if (!isCorrect) {
+            const correctBtn = Array.from(optsEl.children).find((b) => b.textContent === correctExpr.tag);
+            if (correctBtn) correctBtn.classList.add('correct');
+          }
+          results[correctExpr.expr] = isCorrect;
+          if (Object.keys(results).length === questions.length) {
+            const correctCount = Object.values(results).filter(Boolean).length;
+            const summary = el(
+              'div', 'quiz-result',
+              `오늘의 표현 ${data.expressions.length}개 · 퀴즈 ${questions.length}문제 중 ${correctCount}개 정답. ` +
+              (correctCount < questions.length ? '틀린 표현은 내일 다시 볼게요.' : '완벽해요! 7일 뒤에 복습해요.')
+            );
+            quizEl.appendChild(summary);
+            saveQuizProgress(questions, results);
+          }
+        });
+        optsEl.appendChild(btn);
+      });
+      qBox.appendChild(optsEl);
+      quizEl.appendChild(qBox);
+    });
+  }
+  buildQuiz();
+</script>
+</body>
+</html>

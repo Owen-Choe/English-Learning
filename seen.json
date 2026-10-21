@@ -51,8 +51,16 @@
     "last_attempted_at": "2026-08-19T22:20:43.799502+09:00",
     "status": "processed"
   },
+  "HKWXnoa7GYg": {
+    "last_attempted_at": "2026-10-21T14:26:46.174381+09:00",
+    "status": "processed"
+  },
   "Hhl74xWssbU": {
     "last_attempted_at": "2026-08-31T22:40:55.287376+09:00",
+    "status": "llm_validation_failed"
+  },
+  "L6S9Vb3RLy4": {
+    "last_attempted_at": "2026-10-21T14:26:05.066318+09:00",
     "status": "llm_validation_failed"
   },
   "LiH-P4rSkLI": {
@@ -75,6 +83,10 @@
     "last_attempted_at": "2026-08-23T09:58:43.537469+09:00",
     "status": "processed"
   },
+  "RE3_PGwDwhw": {
+    "last_attempted_at": "2026-10-21T14:24:51.080959+09:00",
+    "status": "llm_validation_failed"
+  },
   "T2GOaC4GoFA": {
     "last_attempted_at": "2026-08-24T22:36:39.843902+09:00",
     "status": "llm_validation_failed"
@@ -94,6 +106,10 @@
   "_LHh3BS9Xx4": {
     "last_attempted_at": "2026-10-11T16:29:27.232893+09:00",
     "status": "processed"
+  },
+  "aIUIMRDVoyE": {
+    "last_attempted_at": "2026-10-21T14:24:52.264340+09:00",
+    "status": "transcript_disabled"
   },
   "aYmkOO-c0WI": {
     "last_attempted_at": "2026-08-29T19:09:20.361788+09:00",
